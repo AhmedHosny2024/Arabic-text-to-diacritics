@@ -44,7 +44,7 @@ def write_to_file(output_file_path, text):
 
 
 folder_name = "dataset"
-output_folder_name = "clean_dataset"
+output_folder_name = "clean dataset"
 
 text = read_text(f"{folder_name}/train.txt")[:10000]
 clean_text = preprocess_text(text)
