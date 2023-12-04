@@ -53,6 +53,8 @@ cover/
 
 #vscode
 *.vscode
+/clean dataset
+/dataset
 
 # Translations
 *.mo

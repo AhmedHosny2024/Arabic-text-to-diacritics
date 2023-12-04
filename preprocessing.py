@@ -1,11 +1,12 @@
 import re
 import os
 
-
+# TODO: 1) remove all non-Arabic characters , but keep them in array to use them in the future work 
 class TextProcessor:
     def __init__(self, input_folder, output_folder):
         self.input_folder = input_folder
         self.output_folder = output_folder
+        print("Text Processor Initialized")
 
     def preprocess_text(self, text):
         # remove non-Arabic characters
@@ -17,7 +18,7 @@ class TextProcessor:
         # remove html tags
         text = re.sub(r"<.*?>", "", text)
         # remove urls
-        text = re.sub(r"http\S+", "", text)
+        text = re.sub(r"https?\S+", "", text)
         # remove emails
         text = re.sub(r"\S+@\S+", "", text)
         # remove hashtags
@@ -26,6 +27,8 @@ class TextProcessor:
         text = re.sub(r"@\S+", "", text)
         # remove brackets
         text = re.sub(r"\[.*?\]", "", text)
+        # remove special characters
+        text = re.sub(r"\"|\'|\&\&|\|\||\=\=|\!\=|\<\=|\>\=|\<|\>|\+|\-|\*|\/|\%|\^|\~|\&|\||\!|\=|\<|\>|\(|\)|\{|\}|\[|\]|\:|\;|\?|\_|\`|\@|\#|\$|\\|\,|\.|\“|\”|\«|\»|\٠|\١|\٢|\٣|\٤|\٥|\٦|\٧|\٨|\٩", "", text)
         return text
 
     @staticmethod

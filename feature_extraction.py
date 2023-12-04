@@ -3,6 +3,7 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 class ArabicTextFeatures:
     def __init__(self, text):
         self.text = text
+        print("Arabic Text Features Initialized")
 
     def bag_of_words(self):
         vectorizer = CountVectorizer()

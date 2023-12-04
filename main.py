@@ -31,7 +31,7 @@ def main():
 
 
     processed_text = processor.read_text(os.path.join(output_folder, output_file_name))
-    print("Processed Text:", processed_text[:1000])
+    print("Processed Text of first 1000:", processed_text[:1000])
     
    
 
