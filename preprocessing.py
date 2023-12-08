@@ -48,12 +48,12 @@ class TextProcessor:
             file.write("\n".join(lines))
 
     def process_file(self, input_path, output_path):
-        text = self.read_text(input_path)
+        text = self.read_text(self.input_folder+"/"+input_path)
         print("Before preprocessing data:", len(text))
         clean_text = self.preprocess_text(text)
         print("After preprocessing data:", len(clean_text))
-        self.write_to_file(output_path, clean_text)
+        # self.write_to_file(output_path, clean_text)
 
 
-# processor = TextProcessor("dataset", "clean dataset")
-# processor.process_file("train.txt", "clean_train.txt")
+processor = TextProcessor("Dataset", "clean dataset")
+processor.process_file("train.txt", "clean_train.txt")
