@@ -55,5 +55,5 @@ class TextProcessor:
         # self.write_to_file(output_path, clean_text)
 
 
-processor = TextProcessor("Dataset", "clean dataset")
-processor.process_file("train.txt", "clean_train.txt")
+# processor = TextProcessor("Dataset", "clean dataset")
+# processor.process_file("train.txt", "clean_train.txt")
