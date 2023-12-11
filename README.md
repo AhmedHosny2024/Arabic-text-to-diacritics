@@ -8,3 +8,12 @@
 ### Data spliting
 > Tarek
 
+
+### LSTM
+> Hosny
+
+### CRF
+> Tarek
+
+### RNN
+> Sherif
