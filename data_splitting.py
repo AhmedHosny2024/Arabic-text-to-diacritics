@@ -35,7 +35,7 @@ class DataSplitting:
         if not os.path.exists(dirctory):
             os.makedirs(dirctory)
 
-        with open(dirctory+"/"+file_path, "a", encoding="utf-8") as file:
+        with open(dirctory+"/"+file_path, "w", encoding="utf-8") as file:
             lines = [text[i : i + 200] for i in range(0, len(text), 200)]  # max 200 characters per line
             file.write("\n".join(lines))
 
@@ -46,13 +46,18 @@ class DataSplitting:
 
     def split_data(self,input_path,output_path):
         text = self.read_text(self.input_folder+"/"+input_path)
+        print('----------------text----------------')
+        print(len(text))
+        print('----------------text----------------')
         splitted_text = self.split_arabic_corpus(text)
         self.write_to_file(self.output_folder,output_path, splitted_text)
         return splitted_text
 
 
 
-split_object = DataSplitting('clean dataset','SplittedOut')
-splitted = split_object.split_data('clean_train.txt','SplittedOut.txt')
-# print(splitted)
+split_object = DataSplitting('Data Cleaning','SplittedOut')
+splitted = split_object.split_data('DataCleaning.txt','SplittedOut.txt')
+print('----------------splitted----------------')
+print(len(splitted))
+print('----------------splitted----------------')
 

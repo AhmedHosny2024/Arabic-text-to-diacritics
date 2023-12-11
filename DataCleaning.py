@@ -64,7 +64,7 @@ class DataCleaning:
     def write_to_file(dirctory,file_path, text):
         if not os.path.exists(dirctory):
             os.makedirs(dirctory)
-        with open(dirctory+"/"+file_path, "a", encoding="utf-8") as file:
+        with open(dirctory+"/"+file_path, "w", encoding="utf-8") as file:
             lines = [text[i : i + 200] for i in range(0, len(text), 200)]  # max 200 characters per line
             file.write("\n".join(lines))
 
