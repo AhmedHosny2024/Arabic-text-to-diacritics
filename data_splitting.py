@@ -55,9 +55,9 @@ class DataSplitting:
 
 
 
-split_object = DataSplitting('Data Cleaning','SplittedOut')
-splitted = split_object.split_data('DataCleaning.txt','SplittedOut.txt')
-print('----------------splitted----------------')
-print(len(splitted))
-print('----------------splitted----------------')
+# split_object = DataSplitting('Data Cleaning','SplittedOut')
+# splitted = split_object.split_data('DataCleaning.txt','SplittedOut.txt')
+# print('----------------splitted----------------')
+# print(len(splitted))
+# print('----------------splitted----------------')
 

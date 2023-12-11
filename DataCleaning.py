@@ -75,5 +75,5 @@ class DataCleaning:
         print("After preprocessing data:", len(clean_text))
         self.write_to_file(self.output_folder,output_path, clean_text)
 
-processor = DataCleaning("Dataset", "Data Cleaning")
-processor.process_file("train.txt", "DataCleaning.txt")
+# processor = DataCleaning("Dataset", "Data Cleaning")
+# processor.process_file("train.txt", "DataCleaning.txt")

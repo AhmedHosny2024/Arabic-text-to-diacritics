@@ -3,7 +3,10 @@ from feature_extraction import *
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
-
+import numpy as np
+from DataCleaning import DataCleaning
+from HMM import HMM
+from data_splitting import DataSplitting
 
 def evaluate_features(features, labels):
     X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.3, random_state=42)
@@ -26,14 +29,39 @@ def main():
     input_file_name = "train.txt"
     output_file_name = "processed_text.txt"
 
-    processor = TextProcessor(input_folder, output_folder)
-    processor.process_file(os.path.join(input_folder, input_file_name), os.path.join(output_folder, output_file_name))
+    processor = DataCleaning(input_folder, output_folder)
+    processor.process_file(input_file_name, output_file_name)
 
 
-    processed_text = processor.read_text(os.path.join(output_folder, output_file_name))
-    print("Processed Text of first 1000:", processed_text[:1000])
+    data_splitter = DataSplitting(output_folder,'OutputSplit')
+    data_splitter.split_data(output_file_name,'final_out.txt')
+
+    processed_text = processor.read_text(os.path.join('OutputSplit', 'final_out.txt'))
+    # print("Processed Text of first 1000:", processed_text[:1000])
+
     
-   
+    feature_extraction = ArabicTextFeatures(processed_text[:80000])
+    text_after_feature_extraction = feature_extraction.NER()
+
+    print('---------------text after')
+    print(text_after_feature_extraction)
+    print('---------------text after')
+
+    n_states = 3 
+    n_iter = 100
+    tol = 0.01
+    verbose = True 
+    startprop= np.array([0.5,0.5,0.5])
+    transmat = np.array([[0.5,0.5,0.5],[0.5,0.5,0.5],[0.5,0.5,0.5]])
+    covar = np.array([[0.5,0.5,0.0],[0.0,0.5,0.5],[0.5,0.0,0.5]])
+    HMM_model = HMM(n_states, n_iter, tol, verbose,startprop,transmat,covar)
+    HMM_model.fit(text_after_feature_extraction)
+
+    feature_extraction_test = ArabicTextFeatures('ذهب زياد الي المدرسة')
+    feature_extraction_test_features = feature_extraction_test.NER()
+    print(HMM.predict(feature_extraction_test_features))
+
+    print('----------------finished---------------')
 
     
     features = ArabicTextFeatures(processed_text)

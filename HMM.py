@@ -1,5 +1,5 @@
 import numpy as np
-from hmmlearn import MultinomialHMM
+from hmmlearn.hmm import MultinomialHMM
 
 class HMM:
     # n_states: number of hidden states
@@ -25,6 +25,11 @@ class HMM:
         self.hmm.startprob_=self.startprop
         self.hmm.transmat_=self.transmat
         self.hmm.emissionprob_=self.covar
+
+        print('-----------X')
+        print(X)
+        print('-----------X')
+        print(X.shape)
         self.hmm.fit(X)
         return self.hmm
     
