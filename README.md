@@ -2,6 +2,8 @@
 
 ### Tasks
 
+# 
+
 ### Data preprocessing (Cleaning , Tokenization) Tarek
 
 input = train data file (from eng)
@@ -9,14 +11,14 @@ output = text after preprocessing (with diacritics [golden output] , without dia
 
 ### Features ( at least 3 ) sherif
 
-without diacritcs file
+input = without diacritcs file
 
 Bag of Words
 TF-IDF
 Word Embeddings
 Trainable embeddings
 
-first element in the list is represent the first line in the with diacritics [golden output]
+output = first element in the list is represent the first line in the with diacritics [golden output]
 length of the output feature list == number of with diacritics [golden output] lines
 
 ### models Hosny
@@ -28,3 +30,4 @@ LSTM
 GRU
 
 output = all dicretics text in output file
+
