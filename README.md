@@ -2,7 +2,7 @@
 
 ### Tasks
 
-# 
+# 20/12
 
 ### Data preprocessing (Cleaning , Tokenization) Tarek
 
