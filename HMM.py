@@ -34,6 +34,4 @@ class HMM:
         return self.hmm
     
     def predict(self, X):
-        return self.hmm.predict(X)
-    
-    
+        return self.hmm.predict(X)    

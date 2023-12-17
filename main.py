@@ -34,15 +34,17 @@ def main():
 
 
     data_splitter = DataSplitting(output_folder,'OutputSplit')
-    data_splitter.split_data(output_file_name,'final_out.txt')
+    text=data_splitter.split_data(output_file_name,'final_out.txt')
 
-    processed_text = processor.read_text(os.path.join('OutputSplit', 'final_out.txt'))
-    # print("Processed Text of first 1000:", processed_text[:1000])
+    # read data from file final_out.txt 
+    processed_text = data_splitter.read_text('OutputSplit/final_out.txt')
+    print('----------------start---------------')
+    print(text[:100])
+    print('----------------start---------------')
+  
 
-    
     feature_extraction = ArabicTextFeatures(processed_text[:80000])
     text_after_feature_extraction = feature_extraction.NER()
-
     print('---------------text after')
     print(text_after_feature_extraction)
     print('---------------text after')
@@ -64,10 +66,10 @@ def main():
     print('----------------finished---------------')
 
     
-    features = ArabicTextFeatures(processed_text)
-    bow = features.bag_of_words()
-    tfidf = features.tfidf()
-    char_ngrams = features.char_ngrams()
+    # features = ArabicTextFeatures(processed_text)
+    # bow = features.bag_of_words()
+    # tfidf = features.tfidf()
+    # char_ngrams = features.char_ngrams()
 
     
     # print("Bag of Words:", bow)
