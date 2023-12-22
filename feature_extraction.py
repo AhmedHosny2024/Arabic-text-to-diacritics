@@ -1,7 +1,9 @@
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from gensim.models import KeyedVectors
 from gensim.models import Word2Vec
+import gensim
 import multiprocessing
+import numpy as np
 
 
 # import spacy
@@ -47,19 +49,34 @@ class ArabicTextFeatures:
         return ngrams
 
     # todo implement word embeddings
+
     def word_embeddings(self, model):
         list_of_embeddings = []
-        for line in self.text.split("\n"):
-            words = line.split()  # Splitting line into words
+        lines = self.text.split("\n")
+        print("Number of lines to process:", len(lines)) 
+
+        for idx, line in enumerate(lines):
+            print(f"Processing line {idx + 1}: {line}") 
+            words = line.split()
+            print("Number of words in line:", len(words))
+
             embeddings = []
             for word in words:
-                if word in model.wv:  # Access the word vectors using model.wv
+                if word in model.wv:
                     embeddings.append(model.wv[word])
                 else:
-                    embeddings.append(np.zeros(model.vector_size))  # Placeholder for unknown words
+                    embeddings.append(np.zeros(model.vector_size))
             list_of_embeddings.append(embeddings)
-
         return list_of_embeddings
+
+
+
+
+
+# model = Word2Vec(sentences, min_count=1)
+
+
+
 
 
     # part of speech tagging
@@ -102,7 +119,7 @@ class ArabicTextFeatures:
 file_path = "clean_dataset/first_20_lines.txt"
 
 with open(file_path, "r", encoding="utf8") as file:
-    text = [next(file) for _ in range(20)]
+    text = [next(file) for _ in range(10)]
 
 # with open("clean_dataset/first_20_lines.txt", "w", encoding="utf8") as file:
 #     file.writelines(text)
@@ -120,28 +137,34 @@ therefore, if I have 20 lines ,, should have 20 lists
 
 # read first 100 lines from the text
 applied_features = ArabicTextFeatures(text)
-applying_bow = applied_features.tfidf()
-with open("clean_dataset/bow.txt", "w", encoding="utf8") as writing_bow:
-    for line in applying_bow:
-        writing_bow.write(str(line) + "\n")
+# applying_bow = applied_features.tfidf()
+# with open("clean_dataset/bow.txt", "w", encoding="utf8") as writing_bow:
+#     for line in applying_bow:
+#         writing_bow.write(str(line) + "\n")
 
 
-cores = multiprocessing.cpu_count()
+# cores = multiprocessing.cpu_count()
 
-w2v_model = Word2Vec(
-    min_count=20,
-    window=2,
-    vector_size=20,
-    sample=6e-5,
-    alpha=0.03,
-    min_alpha=0.0007,
-    negative=20,
-    workers=cores - 1,
-)
+# w2v_model = Word2Vec(
+#     min_count=20,
+#     window=2,
+#     vector_size=20,
+#     sample=6e-5,
+#     alpha=0.03,
+#     min_alpha=0.0007,
+#     negative=20,
+#     workers=cores - 1,
+# )
+file_path = './SG_300_3_400/w2v_SG_300_3_400_10.model'
+word_embed = Word2Vec.load(file_path)
+word_embeddings = applied_features.word_embeddings(word_embed)
+print("Length of word embeddings: ", len(word_embeddings))
 
-word_embeddings = applied_features.word_embeddings(w2v_model)
 # write word embeddings to file
 with open("clean_dataset/word_embeddings.txt", "w", encoding="utf8") as writing_embeddings:
     for line in word_embeddings:
         writing_embeddings.write(str(line) + "\n")
+        
+
+
 
