@@ -1,8 +1,5 @@
-from numpy import vstack
-from sklearn.base import accuracy_score
 from torch import nn
 import torch
-from torch import optim
 
 class LSTM(nn.Module):
     def __init__( self,
@@ -39,54 +36,6 @@ class LSTM(nn.Module):
         output = self.projection(output)
         return output
       
-# train the model From lab 4
-# train dataloader and model
-def train(train_dl, model):
-    # define the optimization
-    criterion = nn.CrossEntropyLoss(ignore_index=0) 
-    optimizer = optim.Adam(model.parameters(), lr=0.01)
-    # enumerate epochs
-    for epoch in range(100):
-        # enumerate mini batches
-        # the input should be the arabic text without the diacritics
-        # the target should be the arabic text with the diacritics
-        # the input and target should be with shape (batch_size,seq_len)
-        # train_dl is the train dataloader with shape (batch_size,seq_len)
-        # batch_size is the number of samples in each batch
-        # seq_len is the length of each sample
-        for i, (inputs, targets) in enumerate(train_dl):
-            # clear the gradients
-            optimizer.zero_grad()
-            # compute the model output
-            yhat = model(inputs)
-            # calculate loss
-            loss = criterion(yhat, targets)
-            # credit assignment
-            loss.backward()
-            # update model weights
-            optimizer.step()
-
-# evaluate the model From lab 4
-# test dataloader and model
-def evaluate_model(test_dl, model):
-    predictions, actuals = list(), list()
-    for i, (inputs, targets) in enumerate(test_dl):
-        # evaluate the model on the test set
-        yhat = model(inputs)
-        # retrieve numpy array
-        yhat = yhat.detach().numpy()
-        actual = targets.numpy()
-        actual = actual.reshape((len(actual), 1))
-        # round to class values
-        yhat = yhat.round()
-        # store
-        predictions.append(yhat)
-        actuals.append(actual)
-    predictions, actuals = vstack(predictions), vstack(actuals)
-    # calculate accuracy
-    acc = accuracy_score(actuals, predictions)
-    return acc
-
 
         
     
