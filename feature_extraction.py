@@ -121,9 +121,9 @@ file_path = "clean_dataset/first_20_lines.txt"
 with open(file_path, "r", encoding="utf8") as file:
     text = [next(file) for _ in range(10)]
 
-# with open("clean_dataset/first_20_lines.txt", "w", encoding="utf8") as file:
-#     file.writelines(text)
-# make data string instead of list
+with open("clean_dataset/first_20_lines.txt", "w", encoding="utf8") as file:
+    file.writelines(text)
+
 text = "\n".join(text)
 print(text)
 """
@@ -137,10 +137,10 @@ therefore, if I have 20 lines ,, should have 20 lists
 
 # read first 100 lines from the text
 applied_features = ArabicTextFeatures(text)
-# applying_bow = applied_features.tfidf()
-# with open("clean_dataset/bow.txt", "w", encoding="utf8") as writing_bow:
-#     for line in applying_bow:
-#         writing_bow.write(str(line) + "\n")
+applying_bow = applied_features.tfidf()
+with open("clean_dataset/tf_idf.txt", "w", encoding="utf8") as writing_bow:
+    for line in applying_bow:
+        writing_bow.write(str(line) + "\n")
 
 
 # cores = multiprocessing.cpu_count()
