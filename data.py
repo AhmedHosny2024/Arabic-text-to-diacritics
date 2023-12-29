@@ -247,7 +247,7 @@ def get_validation():
 
 def get_data(path):
     text=read_text(path)
-    text=text[:200]
+    # text=text[:200]
     text=preprocess(text)
     text=split_text(text)
     data=[]
