@@ -3,6 +3,8 @@ import torch.nn as nn
 
 from torch import optim
 from numpy import vstack
+import numpy as np
+
 
 class LSTM(nn.Module):
     def __init__(self, inp_vocab_size: int, hidden_dim: int = 256, seq_len: int = 42, num_classes: int = 19):
@@ -67,7 +69,7 @@ def calculate_DER(actual_labels, predicted_labels):
     DER = (total_errors / total_frames) * 100.0
     return DER.item()  # Convert PyTorch scalar to Python float
 
-import numpy as np
+
 def evaluate_model(test_dl, model):
     predictions, actuals = [], []
     for i, (inputs, targets) in enumerate(test_dl):
