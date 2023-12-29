@@ -35,6 +35,7 @@ for letter in ARABIC_LETTERS_LIST:
     arabic_letters.append(letter[0])
 arabic_letters.append(" ")
 
+
 dicritics=[]
 for letter in DIACRITICS_LIST:
     dicritics.append(letter[0])
@@ -69,7 +70,7 @@ def write_to_file_second(dirctory,file_path, text):
     if not os.path.exists(dirctory):
         os.makedirs(dirctory)
 
-    with open(dirctory+"/"+file_path, "a", encoding="utf-8") as file:
+    with open(dirctory+"/"+file_path, "w", encoding="utf-8") as file:
         lines=text
         for l in lines:
             file.write(l)
@@ -83,6 +84,7 @@ def write_to_file_labels(dirctory,file_path, text):
         for l in lines:
             file.write(inverted_classes[l])
         file.write('\n')
+
 
 def write_to_file_string(dirctory,file_path, text):
     if not os.path.exists(dirctory):
@@ -287,8 +289,8 @@ def get_data(path):
                 labels.append(suplabels)
         # data.append(d)
         # labels.append(l)
-    for d in data:
-        write_to_file_string("test","data.txt",d)
+    # for d in data:
+    #     write_to_file_string("test","data.txt",d)
     return data,labels
 
 def get_features(data,labels):
@@ -314,8 +316,8 @@ class DataSet():
         print("Extracting features...")
         data,labels=get_features(data1,labels1)
         # now the data and labels are tensor
-        # data is tensor of shape (number of sentences,600,37)
-        # labels is tensor of shape (number of sentences,600)
+        # data is tensor of shape (number of sentences,max_len,37)
+        # labels is tensor of shape (number of sentences,max_len)
         print("Creating dataloader...")
         dataloader=get_dataloader(data,labels,batch_size)
         self.x=data1

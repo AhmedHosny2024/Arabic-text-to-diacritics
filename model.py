@@ -14,7 +14,6 @@ def write_to_file_string(dirctory,file_path, text):
         lines=text
         file.write(lines)
         file.write('\n')
-        file.write('\n')
 
 class LSTM(nn.Module):
     def __init__(self, inp_vocab_size: int, hidden_dim: int = 256, seq_len: int = 600, num_classes: int = 16):
@@ -28,11 +27,10 @@ class LSTM(nn.Module):
         output = self.fc(output)
         return output
 
-def train(train_dl, model,data):
+def train(train_dl, model):
     # define the optimization
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.0001)
-    oldloss=10
+    optimizer = optim.Adam(model.parameters(), lr=0.01)
     # enumerate epochs
     for epoch in range(1):
         for i, (inputs, targets) in enumerate(train_dl):
@@ -41,19 +39,13 @@ def train(train_dl, model,data):
             optimizer.zero_grad()
             # compute the model output
             yhat = model(inputs)
-            # yhat = yhat.view(inputs.size(0), inputs.size(1), -1)  # Reshape back to sequence length
             yhat = yhat.view(-1, yhat.size(2))  # Reshape model output to [batch_size * sequence_length, num_classes]
             targets = targets.view(-1)  # Reshape targets to [batch_size * sequence_length]
-            print(yhat.shape)
-            print(targets.shape)
+            # print(yhat.shape)
+            # print(targets.shape)
+
             # calculate loss
             loss = criterion(yhat, targets)
-            if(oldloss - loss < 0):
-                for j in range(i,i+len(targets),1):
-                    x,y=data.item(j)
-                    write_to_file_string("test","data.txt",x)
-            oldloss=loss
-            # credit assignment
             loss.backward()
             # update model weights
             optimizer.step()
