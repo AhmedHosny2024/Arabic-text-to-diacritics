@@ -12,7 +12,7 @@ num_classes = 16
 
 model = LSTM(inp_vocab_size, hidden_dim, seq_len, num_classes)
 print("-------------------start training-------------------")
-train(Traindataloader, model)
+train(Traindataloader, model,Traindata)
 
 # Validation=DataSet('Dataset/val.txt',batch_size=1)
 # Validationdataloader=Validation.getdata()

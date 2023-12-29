@@ -5,6 +5,16 @@ from torch import optim
 from numpy import vstack
 import numpy as np
 
+import os
+def write_to_file_string(dirctory,file_path, text):
+    if not os.path.exists(dirctory):
+        os.makedirs(dirctory)
+
+    with open(dirctory+"/"+file_path, "a", encoding="utf-8") as file:
+        lines=text
+        file.write(lines)
+        file.write('\n')
+        file.write('\n')
 
 class LSTM(nn.Module):
     def __init__(self, inp_vocab_size: int, hidden_dim: int = 256, seq_len: int = 600, num_classes: int = 16):
@@ -18,10 +28,11 @@ class LSTM(nn.Module):
         output = self.fc(output)
         return output
 
-def train(train_dl, model):
+def train(train_dl, model,data):
     # define the optimization
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.0001)
+    oldloss=10
     # enumerate epochs
     for epoch in range(1):
         for i, (inputs, targets) in enumerate(train_dl):
@@ -37,6 +48,11 @@ def train(train_dl, model):
             print(targets.shape)
             # calculate loss
             loss = criterion(yhat, targets)
+            if(oldloss - loss < 0):
+                for j in range(i,i+len(targets),1):
+                    x,y=data.item(j)
+                    write_to_file_string("test","data.txt",x)
+            oldloss=loss
             # credit assignment
             loss.backward()
             # update model weights

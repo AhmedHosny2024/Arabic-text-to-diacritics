@@ -308,25 +308,25 @@ class DataSet():
 
     def __init__(self,path,batch_size=1) :
         print("Loading data...")
-        data,labels=get_data(path)
+        data1,labels1=get_data(path)
         # now labels is list of list [[1,2,3,4,5,15,15,0],[1,2,3,4,5,15,15,0]]
         # data is list of string ['احمد','محمد']
         print("Extracting features...")
-        data,labels=get_features(data,labels)
+        data,labels=get_features(data1,labels1)
         # now the data and labels are tensor
         # data is tensor of shape (number of sentences,600,37)
         # labels is tensor of shape (number of sentences,600)
         print("Creating dataloader...")
         dataloader=get_dataloader(data,labels,batch_size)
-        self.x=data
-        self.y=labels
+        self.x=data1
+        self.y=labels1
         self.dataloader=dataloader
         print("Done data creation !")
 
     def __len__(self):
          return len(self.y)
     def item(self,idx):
-         return encoding(self.x[idx]),self.y[idx]
+         return self.x[idx],self.y[idx]
     def getdata(self):
         return self.dataloader
     
