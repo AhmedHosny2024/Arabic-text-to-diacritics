@@ -1,3 +1,0 @@
-re==latest
-os==latest
-datasets == latest
