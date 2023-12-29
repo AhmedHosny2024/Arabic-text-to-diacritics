@@ -13,8 +13,11 @@ model = LSTM(inp_vocab_size, hidden_dim, seq_len, num_classes)
 print("-------------------start training-------------------")
 train(Traindataloader, model)
 
-Validation=DataSet('Dataset/val.txt',batch_size=1)
-Validationdataloader=Validation.getdata()
+# Validation=DataSet('Dataset/val.txt',batch_size=1)
+# Validationdataloader=Validation.getdata()
+Validationdataloader=get_validation()
 print("-------------------start evaluating-------------------")
 acc = evaluate_model(Validationdataloader, model)
 print("Accuracy: ", acc)
+
+# validation=get_validation()

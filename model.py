@@ -15,7 +15,6 @@ class LSTM(nn.Module):
     def forward(self, input_sequence: torch.Tensor):
         output, _ = self.lstm(input_sequence)  # Remove unsqueeze(0)
         output = self.fc(output.reshape(-1, output.size(-1)))  # Reshape output for the linear layer
-        output = output.view(input_sequence.size(0), input_sequence.size(1), -1)  # Reshape back to sequence length
         return output
 
 def train(train_dl, model):
@@ -23,7 +22,7 @@ def train(train_dl, model):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.01)
     # enumerate epochs
-    for epoch in range(1):
+    for epoch in range(100):
         for i, (inputs, targets) in enumerate(train_dl):
             # convert the input and target to tensor
             # inputs = torch.tensor(inputs, dtype=torch.float32)
@@ -34,6 +33,7 @@ def train(train_dl, model):
             print(targets.shape)
             # compute the model output
             yhat = model(inputs)
+            yhat = yhat.view(inputs.size(0), inputs.size(1), -1)  # Reshape back to sequence length
             yhat = yhat.view(-1, yhat.size(2))  # Reshape model output to [batch_size * sequence_length, num_classes]
             targets = targets.view(-1)  # Reshape targets to [batch_size * sequence_length]
             
@@ -72,6 +72,7 @@ def calculate_DER(actual_labels, predicted_labels):
 
 def evaluate_model(test_dl, model):
     predictions, actuals = [], []
+    model.eval()
     for i, (inputs, targets) in enumerate(test_dl):
         # evaluate the model on the test set
         yhat = model(inputs)

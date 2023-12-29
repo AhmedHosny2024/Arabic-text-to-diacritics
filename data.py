@@ -209,8 +209,8 @@ def get_dataloader(encoded_data, encoding_labels,batch_size=1):
 
 def get_validation():
     text=read_text('Dataset/val.txt')
-    # text=text[:20]
-    # text=preprocess(text)
+    # text=text[:100]
+    text=preprocess(text)
     # text=split_text(text)
     data=[]
     labels=[]
@@ -239,13 +239,15 @@ def get_validation():
             x=torch.tensor(x,dtype=torch.float32)
         encoded_data = torch.cat((encoded_data, x), 0)
     labels=torch.tensor(labels,dtype=torch.long)
+    print(encoded_data.shape)
+    print(labels.shape)
     dataloader=get_dataloader(encoded_data,labels)
     
     return dataloader
 
 def get_data(path):
     text=read_text(path)
-    # text=text[:20]
+    text=text[:200]
     text=preprocess(text)
     text=split_text(text)
     data=[]
