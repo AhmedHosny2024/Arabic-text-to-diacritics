@@ -209,7 +209,7 @@ def get_dataloader(encoded_data, encoding_labels,batch_size=1):
 
 def get_validation():
     text=read_text('Dataset/val.txt')
-    text=text[:20]
+    # text=text[:20]
     # text=preprocess(text)
     # text=split_text(text)
     data=[]
@@ -245,7 +245,7 @@ def get_validation():
 
 def get_data(path):
     text=read_text(path)
-    text=text[:20]
+    # text=text[:20]
     text=preprocess(text)
     text=split_text(text)
     data=[]
