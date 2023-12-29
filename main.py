@@ -1,7 +1,7 @@
 from data import DataSet, get_validation
 from model import LSTM, train, evaluate_model
 
-Traindata = DataSet("Dataset/train.txt", batch_size=256)
+Traindata = DataSet("Dataset/train.txt", batch_size=1)
 Traindataloader = Traindata.getdata()
 Validationdataloader=get_validation()
 

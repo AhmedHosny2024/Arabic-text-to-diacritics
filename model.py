@@ -10,40 +10,32 @@ class LSTM(nn.Module):
     def __init__(self, inp_vocab_size: int, hidden_dim: int = 256, seq_len: int = 600, num_classes: int = 16):
         super().__init__()
         # self.lstm = nn.LSTM(inp_vocab_size, hidden_dim,num_layers=3, batch_first=True, bidirectional=True)
-
-        self.lstm = nn.LSTM(inp_vocab_size, hidden_dim, batch_first=False, bidirectional=True)
-
+        self.lstm = nn.LSTM(inp_vocab_size, hidden_dim, batch_first=True, bidirectional=True)
         self.fc = nn.Linear(hidden_dim * 2, num_classes)  # Output layer for 0 to 16 integers
 
     def forward(self, input_sequence: torch.Tensor):
-        output, _ = self.lstm(input_sequence)  # Remove unsqueeze(0)
-        output = self.fc(output.reshape(-1, output.size(-1)))  # Reshape output for the linear layer
+        output, _ = self.lstm(input_sequence)  
+        output = self.fc(output)
         return output
 
 def train(train_dl, model):
     # define the optimization
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=0.0001)
     # enumerate epochs
-    for epoch in range(20):
+    for epoch in range(1):
         for i, (inputs, targets) in enumerate(train_dl):
             # convert the input and target to tensor
-            # inputs = torch.tensor(inputs, dtype=torch.float32)
-            # targets = torch.tensor(targets)
             # clear the gradients
             optimizer.zero_grad()
-            # print(inputs.shape)
-            # print(targets.shape)
             # compute the model output
             yhat = model(inputs)
-            yhat = yhat.view(inputs.size(0), inputs.size(1), -1)  # Reshape back to sequence length
+            # yhat = yhat.view(inputs.size(0), inputs.size(1), -1)  # Reshape back to sequence length
             yhat = yhat.view(-1, yhat.size(2))  # Reshape model output to [batch_size * sequence_length, num_classes]
             targets = targets.view(-1)  # Reshape targets to [batch_size * sequence_length]
-            
-            # print(yhat.shape)
-            # print(targets.shape)
+            print(yhat.shape)
+            print(targets.shape)
             # calculate loss
-            
             loss = criterion(yhat, targets)
             # credit assignment
             loss.backward()
@@ -75,7 +67,6 @@ def calculate_DER(actual_labels, predicted_labels):
 
 def evaluate_model(test_dl, model):
     predictions, actuals = [], []
-    model.eval()
     for i, (inputs, targets) in enumerate(test_dl):
         # evaluate the model on the test set
         yhat = model(inputs)

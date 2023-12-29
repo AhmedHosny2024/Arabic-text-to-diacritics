@@ -23,7 +23,7 @@ import os
     
 #     return sentences
 
-max_len=400
+max_len=200
 
 with open('files/arabic_letters.pickle', 'rb') as file:
             ARABIC_LETTERS_LIST = pkl.load(file)
@@ -92,6 +92,7 @@ def write_to_file_string(dirctory,file_path, text):
         lines=text
         file.write(lines)
         file.write('\n')
+        file.write('\n')
 #####################################################
    
 def preprocess(text):
@@ -142,17 +143,17 @@ def get_data_labels(text):
     data=""
     labels=[]
     for i in range(len(text)):
-            if(text[i] in arabic_letters and text[i]):
-                data+=(text[i])
-                if(i+1<len(text) and text[i+1] in dicritics):
-                    if(i+2<len(text) and classes[text[i+1]]==4 and text[i+2] in dicritics):
-                        labels.append(classes[text[i+1]+text[i+2]])
-                        i+=2
-                    else:
-                        labels.append(classes[text[i+1]])
-                        i+=1
+        if(text[i] in arabic_letters and text[i]):
+            data+=(text[i])
+            if(i+1<len(text) and text[i+1] in dicritics):
+                if(i+2<len(text) and classes[text[i+1]]==4 and text[i+2] in dicritics):
+                    labels.append(classes[text[i+1]+text[i+2]])
+                    i+=2
                 else:
-                    labels.append(15)
+                    labels.append(classes[text[i+1]])
+                    i+=1
+            else:
+                labels.append(15)
     return data,labels
 
 # def one_hot_encoding(text):
@@ -229,8 +230,8 @@ def get_data(path):
     text=text[:size]
     print(len(text))
     
-    text=split_text(text)
-
+    # text=split_text(text)
+    text=text.split('.')
     # write_to_file_second("test","data.txt",text)
     # # get max length of sentence in text 
     # maxdata=text.split('\n')
@@ -253,15 +254,41 @@ def get_data(path):
         d=""
         l=[]
         d,l=get_data_labels(t)
+        # if(len(d)<max_len):
+        #     while(len(d)<max_len):
+        #         d+=" "
+        #         l.append(15)
+        # else:
+        #     d=d[:max_len]
+        #     l=l[:max_len]
+        if(len(d)==0): continue
         if(len(d)<max_len):
             while(len(d)<max_len):
-                d+=(" ")
-                l.append(15)
-        else:
-            d=d[:max_len]
-            l=l[:max_len]
-        data.append(d)
-        labels.append(l)
+                 d+=" "
+                 l.append(15)
+            data.append(d)
+            labels.append(l)
+            continue
+        if(len(d)>max_len):
+            data.append(d[:max_len])
+            labels.append(l[:max_len])
+            supdata=d[max_len:]
+            suplabels=l[max_len:]
+            while(len(supdata)>max_len):
+                data.append(supdata[:max_len])
+                labels.append(suplabels[:max_len])
+                supdata=supdata[max_len:]
+                suplabels=suplabels[max_len:]
+            if(len(supdata)<max_len):
+                while(len(supdata)<max_len):
+                    supdata+=" "
+                    suplabels.append(15)
+                data.append(supdata)
+                labels.append(suplabels)
+        # data.append(d)
+        # labels.append(l)
+    for d in data:
+        write_to_file_string("test","data.txt",d)
     return data,labels
 
 def get_features(data,labels):
