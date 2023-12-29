@@ -1,4 +1,29 @@
 import pickle as pkl
+from torch.utils.data import TensorDataset, DataLoader
+import re
+import torch
+import numpy as np 
+
+
+import os
+
+# import stanfordnlp
+
+# Download the Arabic models for the neural pipeline
+# stanfordnlp.download('ar', force=True)
+# Build a neural pipeline using the Arabic models
+# nlp = stanfordnlp.Pipeline(lang='ar')
+
+# def split_arabic_sentences_with_stanfordnlp(corpus_text):
+#     # Process the text
+#     doc = nlp(corpus_text)
+    
+#     # Extract sentences from the doc
+#     sentences = [sentence.text for sentence in doc.sentences]
+    
+#     return sentences
+
+max_len=400
 
 with open('files/arabic_letters.pickle', 'rb') as file:
             ARABIC_LETTERS_LIST = pkl.load(file)
@@ -36,7 +61,6 @@ classes = {
 inverted_classes = {v: k for k, v in classes.items()}
 
 ##################### to delete #####################
-import os
 def read_text(file_path):
     with open(file_path, "r", encoding="utf-8") as file:
         return file.read()
@@ -69,9 +93,7 @@ def write_to_file_string(dirctory,file_path, text):
         file.write(lines)
         file.write('\n')
 #####################################################
-import re
-import torch
-import numpy as np    
+   
 def preprocess(text):
          # Remove URLs 
         text = re.sub(r"http[s|S]\S+", "", text,flags=re.MULTILINE)
@@ -89,21 +111,31 @@ def preprocess(text):
         # remove arabic numbers
         text = re.sub(r"[٠-٩]+", "", text,flags=re.MULTILINE)
          # remove brackets
-        text = re.sub(r"\[.*?\]", "", text)
-        text = re.sub(r"\(.*?\)", "", text)
+        # text = re.sub(r"\[.*?\]", "", text)
+        # text = re.sub(r"\(.*?\)", "", text)
         return text
 
 def split_text(text):
     text=text.split('.')
+    # split text to sentences on all arabic sparatators
+
     data=[]
     for t in text:
         if(len(t)==0): continue
-        if(len(t)<600):
-            while(len(t)<600):
+        if(len(t)<max_len):
+            while(len(t)<max_len):
                  t+=" "
             data.append(t)
-        if(len(t)>600):
-             data.append(t[:600])
+        if(len(t)>max_len):
+            data.append(t[:max_len])
+            supdata=t[max_len:]
+            while(len(supdata)>max_len):
+                data.append(supdata[:max_len])
+                supdata=supdata[max_len:]
+            if(len(supdata)<max_len):
+                while(len(supdata)<max_len):
+                    supdata+=" "
+                data.append(supdata)
     return data
 
 def get_data_labels(text):
@@ -123,16 +155,16 @@ def get_data_labels(text):
                     labels.append(15)
     return data,labels
 
-def one_hot_encoding(text):
-    onehot_encoded=[]
-    for i in range(len(text)):
-         if text[i] in arabic_letters:
-            idx=arabic_letters.index(text[i])
-            encode=np.zeros(len(arabic_letters))
-            encode[idx]=1
-            onehot_encoded.append(encode)
-    onehot_encoded=torch.tensor(onehot_encoded)
-    return onehot_encoded 
+# def one_hot_encoding(text):
+#     onehot_encoded=[]
+#     for i in range(len(text)):
+#          if text[i] in arabic_letters:
+#             idx=arabic_letters.index(text[i])
+#             encode=np.zeros(len(arabic_letters))
+#             encode[idx]=1
+#             onehot_encoded.append(encode)
+#     onehot_encoded=torch.tensor(onehot_encoded)
+#     return onehot_encoded 
 
 def encoding(text):
     idx=arabic_letters.index(text)
@@ -140,77 +172,22 @@ def encoding(text):
     encode[idx]=1
     return torch.tensor(encode,dtype=torch.float32)
 
-# text=read_text("Dataset/train.txt")
-# text=preprocess(text)
-# text=split_text(text)
-# text=text[:20]
-# data=[]
-# labels=[]
-# for t in text:
-#     d=""
-#     l=[]
-#     d,l=get_data_labels(t)
-#     if(len(d)<600):
-#         while(len(d)<600):
-#             d+=(" ")
-#             l.append(15)
-#     else:
-#         d=d[:600]
-#         l=l[:600]
-#     data.append(d)
-#     labels.append(l)
-
-# # features extraction
-# encoded_data = torch.empty(0, 600, len(arabic_letters))
-# for d in data:
-#     # check error
-#     if(len(d)!=600):
-#          print(len(d))
-#          print("#"*10)
-    
-#     enc = torch.empty(0, len(arabic_letters))
-#     for letter in d:
-#         x = encoding(letter).unsqueeze(0)
-#         enc = torch.cat((enc, x), 0)
-#     encoded_data = torch.cat((encoded_data, enc.unsqueeze(0)), 0)
-# print(encoded_data.shape)
-# encoding_labels=torch.tensor(labels)
-# print(encoding_labels.shape)
-
-# for i in range(len(data)):
-#     write_to_file_second("test","data.txt",data[i])
-#     write_to_file_labels("test","data.txt",labels[i])    
-# print(len(data))
-# print(len(labels))
-
-# for letter in arabic_letters:
-#   write_to_file_second("test","data.txt",arabic_letters[len(arabic_letters)-1])
-
-# print(encoding('ا'))
-# print("-------------------")
-# text=read_text("Dataset/train.txt")
-# text=preprocess(text)
-# text=split_text(text)
-# print(len(text))
-
-# data,labels=get_data_labels(text)
-# print(type(data[0]))
-# print(labels[0])
-from torch.utils.data import TensorDataset, DataLoader
 
 def get_dataloader(encoded_data, encoding_labels,batch_size=1):
-# Create TensorDataset
+    # Create TensorDataset
     dataset = TensorDataset(encoded_data, encoding_labels)
-
     # Create DataLoader
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
     return dataloader
 
 
 def get_validation():
     text=read_text('Dataset/val.txt')
-    # text=text[:100]
     text=preprocess(text)
+    size=int(0.02*len(text))
+    text=text[:size]
+    # text=split_text(text)
+    # write_to_file_second("test","data.txt",text)
     # text=split_text(text)
     data=[]
     labels=[]
@@ -226,9 +203,9 @@ def get_validation():
                         i+=1
                 else:
                     labels.append(15)
-        else:
-            data.append(text[i])
-            labels.append(15)
+        # else:
+        #     data.append(text[i])
+        #     labels.append(15)
     encoded_data = torch.empty(0, len(arabic_letters),dtype=torch.float32)
     
     for letter in data:
@@ -239,45 +216,65 @@ def get_validation():
             x=torch.tensor(x,dtype=torch.float32)
         encoded_data = torch.cat((encoded_data, x), 0)
     labels=torch.tensor(labels,dtype=torch.long)
-    print(encoded_data.shape)
-    print(labels.shape)
+    # print(encoded_data.shape)
+    # print(labels.shape)
     dataloader=get_dataloader(encoded_data,labels)
     
     return dataloader
 
 def get_data(path):
     text=read_text(path)
-    # text=text[:200]
     text=preprocess(text)
+    size=int(0.02*len(text))
+    text=text[:size]
+    print(len(text))
+    
     text=split_text(text)
+
+    # write_to_file_second("test","data.txt",text)
+    # # get max length of sentence in text 
+    # maxdata=text.split('\n')
+
+    # max_len=0
+    # for t in maxdata:
+    #     if(len(t)>max_len):
+    #         max_len=len(t)
+    # print(max_len)
+
+    # split text to sentences on all arabic sparatators
+    # text = split_arabic_sentences_with_stanfordnlp(text)
+
+    # Filter out empty strings or whitespace-only sentences
+    # text = [s.strip() for s in sentences if s.strip()]
+
     data=[]
     labels=[]
     for t in text:
         d=""
         l=[]
         d,l=get_data_labels(t)
-        if(len(d)<600):
-            while(len(d)<600):
+        if(len(d)<max_len):
+            while(len(d)<max_len):
                 d+=(" ")
                 l.append(15)
         else:
-            d=d[:600]
-            l=l[:600]
+            d=d[:max_len]
+            l=l[:max_len]
         data.append(d)
         labels.append(l)
     return data,labels
 
 def get_features(data,labels):
-    encoded_data = torch.empty(0, 600, len(arabic_letters),dtype=torch.float32)
+    encoded_data = torch.empty(0, max_len, len(arabic_letters),dtype=torch.float32)
     for d in data:
         enc = torch.empty(0, len(arabic_letters),dtype=torch.float32)
         for letter in d:
             x = encoding(letter).unsqueeze(0)
             enc = torch.cat((enc, x), 0)
         encoded_data = torch.cat((encoded_data, enc.unsqueeze(0)), 0)
-    print(encoded_data.shape)
+    # print(encoded_data.shape)
     encoding_labels=torch.tensor(labels,dtype=torch.long)
-    print(encoding_labels.shape)
+    # print(encoding_labels.shape)
     return encoded_data,encoding_labels
 
 class DataSet():

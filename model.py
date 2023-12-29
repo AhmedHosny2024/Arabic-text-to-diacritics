@@ -7,10 +7,13 @@ import numpy as np
 
 
 class LSTM(nn.Module):
-    def __init__(self, inp_vocab_size: int, hidden_dim: int = 256, seq_len: int = 42, num_classes: int = 19):
+    def __init__(self, inp_vocab_size: int, hidden_dim: int = 256, seq_len: int = 600, num_classes: int = 16):
         super().__init__()
-        self.lstm = nn.LSTM(inp_vocab_size, hidden_dim, batch_first=True, bidirectional=True)
-        self.fc = nn.Linear(hidden_dim * 2, num_classes)  # Output layer for 0 to 18 integers
+        # self.lstm = nn.LSTM(inp_vocab_size, hidden_dim,num_layers=3, batch_first=True, bidirectional=True)
+
+        self.lstm = nn.LSTM(inp_vocab_size, hidden_dim, batch_first=False, bidirectional=True)
+
+        self.fc = nn.Linear(hidden_dim * 2, num_classes)  # Output layer for 0 to 16 integers
 
     def forward(self, input_sequence: torch.Tensor):
         output, _ = self.lstm(input_sequence)  # Remove unsqueeze(0)
@@ -20,17 +23,17 @@ class LSTM(nn.Module):
 def train(train_dl, model):
     # define the optimization
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.01)
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
     # enumerate epochs
-    for epoch in range(100):
+    for epoch in range(20):
         for i, (inputs, targets) in enumerate(train_dl):
             # convert the input and target to tensor
             # inputs = torch.tensor(inputs, dtype=torch.float32)
             # targets = torch.tensor(targets)
             # clear the gradients
             optimizer.zero_grad()
-            print(inputs.shape)
-            print(targets.shape)
+            # print(inputs.shape)
+            # print(targets.shape)
             # compute the model output
             yhat = model(inputs)
             yhat = yhat.view(inputs.size(0), inputs.size(1), -1)  # Reshape back to sequence length
@@ -66,7 +69,7 @@ def calculate_DER(actual_labels, predicted_labels):
     total_frames = len(actual_labels)
     
     # DER calculation
-    DER = (total_errors / total_frames) * 100.0
+    DER = (1-(total_errors / total_frames)) * 100.0
     return DER.item()  # Convert PyTorch scalar to Python float
 
 
