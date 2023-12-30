@@ -359,8 +359,12 @@ class DataSet():
         # now labels is list of list [[1,2,3,4,5,15,15,0],[1,2,3,4,5,15,15,0]]
         # data is list of string ['احمد','محمد']
         print("Extracting features...")
-        data,labels=get_features(data1,labels1)
-        # data,labels=get_word2vec_features(data1,labels1,word_embed_model)
+        # data,labels=get_features(data1,labels1)
+        data,labels=get_word2vec_features(data1,labels1,word_embed_model)
+        print("len of data",len(data))
+        print("len of labels",len(labels))
+        print(data.shape)
+        print(labels.shape)
         print("Saving word embeddings...")
         # write word embeddings to file
         with open("word_embeddings.txt", "w", encoding="utf8") as writing_embeddings:
