@@ -5,6 +5,7 @@ import torch
 import numpy as np 
 from gensim.models import KeyedVectors
 from gensim.models import Word2Vec
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 import os
 
@@ -310,26 +311,44 @@ def get_features(data,labels):
     return encoded_data,encoding_labels
     
 def get_word2vec_features(data, labels, model):
+    max_seq_length = 300
+    encoded_data = torch.empty(0, max_len, max_seq_length, dtype=torch.float32)
 
-    max_sequence_length = 300
-    encoded_data = torch.empty(0, max_len, max_sequence_length, dtype=torch.float32)
-
-    for sentence  in data:
-        enc = torch.empty(0, 300, dtype=torch.float32)
-        for letter in sentence :
+    for sentence in data:
+        encoded_sentence = torch.empty(0, max_seq_length, dtype=torch.float32)
+        for letter in sentence:
             if letter in model.wv:
                 # Convert NumPy array to PyTorch tensor
-                x = torch.tensor(model.wv[letter], dtype=torch.float32).unsqueeze(0)
+                 embedding  = torch.tensor(model.wv[letter], dtype=torch.float32).unsqueeze(0)
             else:
                 # If the word is not in the model's vocabulary, fill with zeros
-                x = torch.zeros((1, 300), dtype=torch.float32)
+                embedding  = torch.zeros((1, max_seq_length), dtype=torch.float32)
 
-            enc = torch.cat((enc, x), 0)
+            encoded_sentence = torch.cat((encoded_sentence, embedding), 0)
 
-        encoded_data = torch.cat((encoded_data, enc.unsqueeze(0)), 0)
+        encoded_data = torch.cat((encoded_data, encoded_sentence.unsqueeze(0)), 0)
 
     encoding_labels = torch.tensor(labels, dtype=torch.long)
 
+    return encoded_data, encoding_labels
+
+    
+def get_tf_idf_features(data, labels):
+    # import tfidf using vectorizer
+    # create the transform
+    vectorizer = TfidfVectorizer()
+    # tokenize and build vocab
+    vectorizer.fit(data)
+    # summarize
+    # print(vectorizer.vocabulary_)
+    # print(vectorizer.idf_)
+    # encode document
+    encoded_data = vectorizer.transform(data)
+    # summarize encoded vector
+    # print(encoded_data.shape)
+    # print(encoded_data.toarray())
+    # print(labels)
+    encoding_labels = torch.tensor(labels, dtype=torch.long)
     return encoded_data, encoding_labels
 
 class DataSet():
