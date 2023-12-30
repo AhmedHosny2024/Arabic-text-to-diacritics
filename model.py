@@ -26,6 +26,17 @@ class LSTM(nn.Module):
         output, _ = self.lstm(input_sequence)  
         output = self.fc(output)
         return output
+    
+class GRU(nn.Module):
+    def __init__(self, inp_vocab_size: int, hidden_dim: int = 256, seq_len: int = 600, num_classes: int = 16):
+        super().__init__()
+        self.gru = nn.GRU(inp_vocab_size, hidden_dim,num_layers=3, batch_first=True, bidirectional=True)
+        self.fc = nn.Linear(hidden_dim * 2, num_classes)  # Output layer for 0 to 16 integers
+
+    def forward(self, input_sequence: torch.Tensor):
+        output, _ = self.gru(input_sequence)  
+        output = self.fc(output)
+        return output
 
 def train(train_dl, model):
     # define the optimization
