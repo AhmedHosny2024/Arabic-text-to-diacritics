@@ -382,7 +382,7 @@ class DataSet():
          return self.x[idx],self.y[idx]
     def getdata(self):
         return self.dataloader
-    
+     
 
 
 
