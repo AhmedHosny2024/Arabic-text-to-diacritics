@@ -14,7 +14,7 @@ Validationdataloader = Valdata.getdata()
 inp_vocab_size = 37
 hidden_dim = 64
 seq_len = 400
-num_classes = 16
+num_classes = 15
 
 model = LSTM(inp_vocab_size, hidden_dim, seq_len, num_classes)
 
