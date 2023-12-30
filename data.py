@@ -3,8 +3,8 @@ from torch.utils.data import TensorDataset, DataLoader
 import re
 import torch
 import numpy as np 
-from gensim.models import KeyedVectors
-from gensim.models import Word2Vec
+# from gensim.models import KeyedVectors
+# from gensim.models import Word2Vec
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 import os
@@ -25,7 +25,7 @@ import os
     
 #     return sentences
 file_path = './SG_300_3_400/w2v_SG_300_3_400_10.model'
-word_embed_model = Word2Vec.load(file_path)
+# word_embed_model = Word2Vec.load(file_path)
 
 max_len=200
 
@@ -59,8 +59,7 @@ classes = {
     'ًّ': 11,
     'ٌّ': 12,
     'ٍّ': 13,
-    'ّّ': 14,
-    "":15,
+    "":14,
 }
 
 inverted_classes = {v: k for k, v in classes.items()}
@@ -102,7 +101,7 @@ def write_to_file_string(dirctory,file_path, text):
 #####################################################
    
 def preprocess(text):
-         # Remove URLs 
+        # Remove URLs 
         text = re.sub(r"http[s|S]\S+", "", text,flags=re.MULTILINE)
         text = re.sub(r"www\S+", "", text,flags=re.MULTILINE)
         # Remove English letters 
@@ -121,6 +120,15 @@ def preprocess(text):
         # text = re.sub(r"\[.*?\]", "", text)
         # text = re.sub(r"\(.*?\)", "", text)
         return text
+
+
+# text=read_text('Dataset/train.txt')
+# text=preprocess(text)
+# print(len(text))
+# # delete except arabic letters and dicritics and punctuation
+# # remove multiple spaces 
+
+# write_to_file_string("test","data.txt",text)
 
 def split_text(text):
     text=text.split('.')
@@ -145,12 +153,34 @@ def split_text(text):
                 data.append(supdata)
     return data
 
+
+HARAQAT = ["ْ", "ّ", "ٌ", "ٍ", "ِ", "ً", "َ", "ُ"]
+ARAB_CHARS = "ىعظحرسيشضق ثلصطكآماإهزءأفؤغجئدةخوبذتن"
+# [".", "،", ":", "؛", "-", "؟"]
+VALID_ARABIC = HARAQAT + list(ARAB_CHARS) + ['.']
+
+
+import re
+
+_whitespace_re = re.compile(r"\s+")
+
+def remove_spaces(text):
+    text = re.sub(_whitespace_re, " ", text)
+    return text
+
+
+def preprocessing(text):
+    text = filter(lambda char: char in VALID_ARABIC, text)
+    text = remove_spaces(''.join(list(text)))
+    return text.strip()
+
+
 def get_data_labels(text):
     data=""
     labels=[]
     for i in range(len(text)):
-        if(text[i] in arabic_letters and text[i]):
-            data+=(text[i])
+        if(text[i] in arabic_letters):
+            data+=text[i]
             if(i+1<len(text) and text[i+1] in dicritics):
                 if(i+2<len(text) and classes[text[i+1]]==4 and text[i+2] in dicritics):
                     labels.append(classes[text[i+1]+text[i+2]])
@@ -159,7 +189,7 @@ def get_data_labels(text):
                     labels.append(classes[text[i+1]])
                     i+=1
             else:
-                labels.append(15)
+                labels.append(14)
     return data,labels
 
 # def one_hot_encoding(text):
@@ -184,15 +214,15 @@ def get_dataloader(encoded_data, encoding_labels,batch_size=1):
     # Create TensorDataset
     dataset = TensorDataset(encoded_data, encoding_labels)
     # Create DataLoader
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     return dataloader
 
 
 def get_validation():
     text=read_text('Dataset/val.txt')
     text=preprocess(text)
-    size=int(0.02*len(text))
-    text=text[:size]
+    # size=int(0.02*len(text))
+    # text=text[:size]
     # text=split_text(text)
     # write_to_file_second("test","data.txt",text)
     # text=split_text(text)
@@ -232,12 +262,32 @@ def get_validation():
 def get_data(path):
     text=read_text(path)
     text=preprocess(text)
-    size=int(0.02*len(text))
-    text=text[:size]
+    # size=int(0.02*len(text))
+    # text=text[:size]
     print(len(text))
-    
+    text = preprocessing(text)
+    text="".join(text)
+    write_to_file_string("test","data.txt",text)
     # text=split_text(text)
     text=text.split('.')
+    data=[]
+    labels=[]
+    for t in text:
+        d=""
+        l=[]
+        if len(t)>300:
+            continue
+        else:
+            d,l=get_data_labels(t)
+            if(len(d)==0): continue
+            if(len(d)<max_len):
+                while(len(d)<max_len):
+                    d+=" "
+                    l.append(14)
+                data.append(d)
+                labels.append(l)
+                continue
+            
     # write_to_file_second("test","data.txt",text)
     # # get max length of sentence in text 
     # maxdata=text.split('\n')
@@ -254,45 +304,39 @@ def get_data(path):
     # Filter out empty strings or whitespace-only sentences
     # text = [s.strip() for s in sentences if s.strip()]
 
-    data=[]
-    labels=[]
-    for t in text:
-        d=""
-        l=[]
-        d,l=get_data_labels(t)
-        # if(len(d)<max_len):
-        #     while(len(d)<max_len):
-        #         d+=" "
-        #         l.append(15)
-        # else:
-        #     d=d[:max_len]
-        #     l=l[:max_len]
-        if(len(d)==0): continue
-        if(len(d)<max_len):
-            while(len(d)<max_len):
-                 d+=" "
-                 l.append(15)
-            data.append(d)
-            labels.append(l)
-            continue
-        if(len(d)>max_len):
-            data.append(d[:max_len])
-            labels.append(l[:max_len])
-            supdata=d[max_len:]
-            suplabels=l[max_len:]
-            while(len(supdata)>max_len):
-                data.append(supdata[:max_len])
-                labels.append(suplabels[:max_len])
-                supdata=supdata[max_len:]
-                suplabels=suplabels[max_len:]
-            if(len(supdata)<max_len):
-                while(len(supdata)<max_len):
-                    supdata+=" "
-                    suplabels.append(15)
-                data.append(supdata)
-                labels.append(suplabels)
-        # data.append(d)
-        # labels.append(l)
+    # data=[]
+    # labels=[]
+    # for t in text:
+    #     d=""
+    #     l=[]
+    #     d,l=get_data_labels(t)
+    #     if(len(d)==0): continue
+    #     if(len(d)<max_len):
+    #         while(len(d)<max_len):
+    #              d+=" "
+    #              l.append(14)
+    #         data.append(d)
+    #         labels.append(l)
+    #         continue
+    #     if(len(d)>max_len):
+    #         data.append(d[:max_len])
+    #         labels.append(l[:max_len])
+    #         supdata=d[max_len:]
+    #         suplabels=l[max_len:]
+    #         while(len(supdata)>max_len):
+    #             data.append(supdata[:max_len])
+    #             labels.append(suplabels[:max_len])
+    #             supdata=supdata[max_len:]
+    #             suplabels=suplabels[max_len:]
+    #         if(len(supdata)<max_len):
+    #             while(len(supdata)<max_len):
+    #                 supdata+=" "
+    #                 suplabels.append(14)
+    #             data.append(supdata)
+    #             labels.append(suplabels)
+    #     # data.append(d)
+    #     # labels.append(l)
+    
     # for d in data:
     #     write_to_file_string("test","data.txt",d)
     return data,labels
@@ -364,6 +408,7 @@ class DataSet():
         # data is tensor of shape (number of sentences,max_len,37)
         # labels is tensor of shape (number of sentences,max_len)
         print("Creating dataloader...")
+
         dataloader=get_dataloader(data,labels,batch_size)
         self.x=data1
         self.y=labels1

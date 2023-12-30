@@ -32,7 +32,7 @@ def train(train_dl, model):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.01)
     # enumerate epochs
-    for epoch in range(1):
+    for epoch in range(100):
         for i, (inputs, targets) in enumerate(train_dl):
             # convert the input and target to tensor
             # clear the gradients
@@ -50,6 +50,7 @@ def train(train_dl, model):
             # update model weights
             optimizer.step()
             print(f'epoch {epoch} batch {i} loss {loss.item()}')
+            # break
     # save model to file after training
     torch.save(model.state_dict(), 'model.pth')
 
@@ -88,6 +89,8 @@ def evaluate_model(test_dl, model):
         # store predictions and actuals
         predictions.extend(predicted_classes.tolist())
         actuals.extend(targets.tolist())
+        # break
     # calculate accuracy
     acc = calculate_DER(np.array(actuals), np.array(predictions))
+
     return acc
