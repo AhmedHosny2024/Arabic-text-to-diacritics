@@ -5,9 +5,11 @@ import torch
 torch.cuda.is_available()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(device)
-Traindata = DataSet( "Dataset/train.txt", batch_size = 1 )
+Traindata = DataSet( "Dataset/train.txt", batch_size = 64 )
 Traindataloader = Traindata.getdata()
-Validationdataloader=get_validation()
+Valdata = DataSet( "Dataset/val.txt", batch_size = 1 )
+Validationdataloader = Valdata.getdata()
+# Validationdataloader=get_validation()
 
 inp_vocab_size = 37
 hidden_dim = 64

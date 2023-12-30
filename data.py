@@ -262,8 +262,8 @@ def get_validation():
 def get_data(path):
     text=read_text(path)
     text=preprocess(text)
-    # size=int(0.02*len(text))
-    # text=text[:size]
+    size=int(0.02*len(text))
+    text=text[:size]
     print(len(text))
     text = preprocessing(text)
     text="".join(text)
