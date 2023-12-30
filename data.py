@@ -3,7 +3,8 @@ from torch.utils.data import TensorDataset, DataLoader
 import re
 import torch
 import numpy as np 
-
+from gensim.models import KeyedVectors
+from gensim.models import Word2Vec
 
 import os
 
@@ -22,6 +23,8 @@ import os
 #     sentences = [sentence.text for sentence in doc.sentences]
     
 #     return sentences
+file_path = './SG_300_3_400/w2v_SG_300_3_400_10.model'
+word_embed_model = Word2Vec.load(file_path)
 
 max_len=200
 
@@ -305,6 +308,29 @@ def get_features(data,labels):
     encoding_labels=torch.tensor(labels,dtype=torch.long)
     # print(encoding_labels.shape)
     return encoded_data,encoding_labels
+    
+def get_word2vec_features(data, labels, model):
+
+    max_sequence_length = 300
+    encoded_data = torch.empty(0, max_len, max_sequence_length, dtype=torch.float32)
+
+    for sentence  in data:
+        enc = torch.empty(0, 300, dtype=torch.float32)
+        for letter in sentence :
+            if letter in model.wv:
+                # Convert NumPy array to PyTorch tensor
+                x = torch.tensor(model.wv[letter], dtype=torch.float32).unsqueeze(0)
+            else:
+                # If the word is not in the model's vocabulary, fill with zeros
+                x = torch.zeros((1, 300), dtype=torch.float32)
+
+            enc = torch.cat((enc, x), 0)
+
+        encoded_data = torch.cat((encoded_data, enc.unsqueeze(0)), 0)
+
+    encoding_labels = torch.tensor(labels, dtype=torch.long)
+
+    return encoded_data, encoding_labels
 
 class DataSet():
 

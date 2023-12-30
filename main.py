@@ -6,6 +6,7 @@ Traindataloader = Traindata.getdata()
 Validationdataloader=get_validation()
 
 inp_vocab_size = 37
+# inp_vocab_size = 200
 hidden_dim = 64
 seq_len = 400
 num_classes = 16
