@@ -51,7 +51,7 @@ def train(train_dl, model):
             optimizer.step()
             print(f'epoch {epoch} batch {i} loss {loss.item()}')
     # save model to file after training
-    torch.save(model.state_dict(), 'model.pth')
+    torch.save(model.state_dict(), 'model.pkl')
 
 
 def calculate_DER(actual_labels, predicted_labels):

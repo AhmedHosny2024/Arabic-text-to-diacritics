@@ -3,12 +3,12 @@ from torch.utils.data import TensorDataset, DataLoader
 import re
 import torch
 import numpy as np 
-from gensim.models import KeyedVectors
+# from gensim.models import KeyedVectors
 from gensim.models import Word2Vec
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 import os
-
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # import stanfordnlp
 
 # Download the Arabic models for the neural pipeline
@@ -232,8 +232,8 @@ def get_validation():
 def get_data(path):
     text=read_text(path)
     text=preprocess(text)
-    size=int(0.02*len(text))
-    text=text[:size]
+    # size=int(0.2*len(text))
+    # text=text[:size]
     print(len(text))
     
     # text=split_text(text)
@@ -312,23 +312,23 @@ def get_features(data,labels):
     
 def get_word2vec_features(data, labels, model):
     max_seq_length = 300
-    encoded_data = torch.empty(0, max_len, max_seq_length, dtype=torch.float32)
+    encoded_data = torch.empty(0, max_len, max_seq_length, dtype=torch.float32).to(device)
 
     for sentence in data:
-        encoded_sentence = torch.empty(0, max_seq_length, dtype=torch.float32)
+        encoded_sentence = torch.empty(0, max_seq_length, dtype=torch.float32).to(device)
         for letter in sentence:
             if letter in model.wv:
                 # Convert NumPy array to PyTorch tensor
-                 embedding  = torch.tensor(model.wv[letter], dtype=torch.float32).unsqueeze(0)
+                 embedding  = torch.tensor(model.wv[letter], dtype=torch.float32).unsqueeze(0).to(device)
             else:
                 # If the word is not in the model's vocabulary, fill with zeros
-                embedding  = torch.zeros((1, max_seq_length), dtype=torch.float32)
+                embedding  = torch.zeros((1, max_seq_length), dtype=torch.float32).to(device)
 
             encoded_sentence = torch.cat((encoded_sentence, embedding), 0)
 
         encoded_data = torch.cat((encoded_data, encoded_sentence.unsqueeze(0)), 0)
 
-    encoding_labels = torch.tensor(labels, dtype=torch.long)
+    encoding_labels = torch.tensor(labels, dtype=torch.long).to(device)
 
     return encoded_data, encoding_labels
 
@@ -361,15 +361,6 @@ class DataSet():
         print("Extracting features...")
         # data,labels=get_features(data1,labels1)
         data,labels=get_word2vec_features(data1,labels1,word_embed_model)
-        print("len of data",len(data))
-        print("len of labels",len(labels))
-        print(data.shape)
-        print(labels.shape)
-        print("Saving word embeddings...")
-        # write word embeddings to file
-        with open("word_embeddings.txt", "w", encoding="utf8") as writing_embeddings:
-            for line in labels:
-                writing_embeddings.write(str(line) + "\n")
         # now the data and labels are tensor
         # data is tensor of shape (number of sentences,max_len,37)
         # labels is tensor of shape (number of sentences,max_len)
