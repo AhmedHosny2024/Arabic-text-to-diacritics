@@ -27,32 +27,39 @@ class LSTM(nn.Module):
         output = self.fc(output)
         return output
 
+torch.cuda.is_available()
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+import pickle
 def train(train_dl, model):
     # define the optimization
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.01)
+    model.to(device)
     # enumerate epochs
-    for epoch in range(1):
+    for epoch in range(50):
         for i, (inputs, targets) in enumerate(train_dl):
             # convert the input and target to tensor
             # clear the gradients
             optimizer.zero_grad()
             # compute the model output
-            yhat = model(inputs)
+            yhat = model(inputs.to(device))
             yhat = yhat.view(-1, yhat.size(2))  # Reshape model output to [batch_size * sequence_length, num_classes]
             targets = targets.view(-1)  # Reshape targets to [batch_size * sequence_length]
             # print(yhat.shape)
             # print(targets.shape)
 
             # calculate loss
-            loss = criterion(yhat, targets)
+            loss = criterion(yhat, targets.to(device))
             loss.backward()
             # update model weights
             optimizer.step()
             print(f'epoch {epoch} batch {i} loss {loss.item()}')
+            # break
     # save model to file after training
-    torch.save(model.state_dict(), 'model.pkl')
-
+    torch.save(model.state_dict(), 'model.pth')
+    model_path = 'model.pkl'
+    with open(model_path, 'wb') as f:
+        pickle.dump(model, f)
 
 def calculate_DER(actual_labels, predicted_labels):
     # Convert lists to PyTorch tensors if they are not already
@@ -60,14 +67,14 @@ def calculate_DER(actual_labels, predicted_labels):
         actual_labels = torch.tensor(actual_labels)
     if not isinstance(predicted_labels, torch.Tensor):
         predicted_labels = torch.tensor(predicted_labels)
-    
+
     # Check if the lengths of both label sequences match
     if len(actual_labels) != len(predicted_labels):
         raise ValueError("Lengths of actual and predicted labels should match.")
-    
+
     total_errors = torch.sum(actual_labels != predicted_labels)
     total_frames = len(actual_labels)
-    
+
     # DER calculation
     DER = (1-(total_errors / total_frames)) * 100.0
     return DER.item()  # Convert PyTorch scalar to Python float
@@ -75,9 +82,10 @@ def calculate_DER(actual_labels, predicted_labels):
 
 def evaluate_model(test_dl, model):
     predictions, actuals = [], []
+    model.to(device)
     for i, (inputs, targets) in enumerate(test_dl):
         # evaluate the model on the test set
-        yhat = model(inputs)
+        yhat = model(inputs.to(device))
         yhat = yhat.detach().cpu().numpy()
         # reshape the outputs to [batch_size * sequence_length, num_classes]
         yhat = yhat.reshape(-1, yhat.shape[-1])
@@ -88,6 +96,8 @@ def evaluate_model(test_dl, model):
         # store predictions and actuals
         predictions.extend(predicted_classes.tolist())
         actuals.extend(targets.tolist())
+        # break
     # calculate accuracy
     acc = calculate_DER(np.array(actuals), np.array(predictions))
+
     return acc
