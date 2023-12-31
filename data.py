@@ -266,8 +266,8 @@ def get_validation():
 def get_data(path):
     text=read_text(path)
     text=preprocess(text)
-    # size=int(0.02*len(text))
-    # text=text[:size]
+    size=int(0.02*len(text))
+    text=text[:size]
     text = preprocessing(text)
     text="".join(text)
     # write_to_file_string("test","data.txt",text)
@@ -425,6 +425,8 @@ class DataSet():
          return self.x[idx],self.y[idx]
     def getdata(self):
         return self.dataloader
+    def get_x_y(self):
+        return self.x,self.y
     
 
 
