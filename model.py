@@ -37,7 +37,8 @@ class GRU(nn.Module):
         output, _ = self.gru(input_sequence)  
         output = self.fc(output)
         return output
-device = torch.device("cpu" if torch.cuda.is_available() else "cpu")
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def train(train_dl, model):
     # define the optimization
     criterion = nn.CrossEntropyLoss()

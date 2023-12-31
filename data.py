@@ -201,17 +201,6 @@ def get_data_labels(text):
                 labels.append(14)
     return data,labels
 
-# def one_hot_encoding(text):
-#     onehot_encoded=[]
-#     for i in range(len(text)):
-#          if text[i] in arabic_letters:
-#             idx=arabic_letters.index(text[i])
-#             encode=np.zeros(len(arabic_letters))
-#             encode[idx]=1
-#             onehot_encoded.append(encode)
-#     onehot_encoded=torch.tensor(onehot_encoded)
-#     return onehot_encoded 
-
 def encoding(text):
     idx=arabic_letters.index(text)
     encode=np.zeros(len(arabic_letters))
@@ -271,9 +260,9 @@ def get_validation():
 def get_test(path):
     text=read_text(path)
     text=preprocess(text)
-    size=int(0.01*len(text))
-    text=text[:size]
-    print(len(text))
+    # size=int(0.01*len(text))
+    # text=text[:size]
+    # print(len(text))
     text = preprocessing(text)
     text="".join(text)
     text=text.split('.')
@@ -310,9 +299,9 @@ def get_test(path):
 def get_data(path):
     text=read_text(path)
     text=preprocess(text)
-    size=int(0.01*len(text))
-    text=text[:size]
-    print(len(text))
+    # size=int(0.01*len(text))
+    # text=text[:size]
+    # print(len(text))
     text = preprocessing(text)
     text="".join(text)
     # write_to_file_string("test","data.txt",text)
@@ -456,6 +445,8 @@ class DataSet():
          return self.x[idx],self.y[idx]
     def getdata(self):
         return self.dataloader
+    def getx(self):
+        return self.x
     
 
 
