@@ -3,6 +3,8 @@ from torch.utils.data import TensorDataset, DataLoader
 import re
 import torch
 import numpy as np 
+from sklearn.feature_extraction.text import CountVectorizer
+import scipy.sparse
 # from gensim.models import KeyedVectors
 # from gensim.models import Word2Vec
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -399,21 +401,38 @@ def get_word2vec_features(data, labels, model):
 
     
 def get_tf_idf_features(data, labels):
-    # import tfidf using vectorizer
-    # create the transform
-    vectorizer = TfidfVectorizer()
-    # tokenize and build vocab
-    vectorizer.fit(data)
-    # summarize
-    # print(vectorizer.vocabulary_)
-    # print(vectorizer.idf_)
-    # encode document
-    encoded_data = vectorizer.transform(data)
-    # summarize encoded vector
-    # print(encoded_data.shape)
-    # print(encoded_data.toarray())
-    # print(labels)
+    # Create a one-hot encoding tensor with the same dimensions as Word2Vec
+    encoded_data = torch.empty(0, max_len, len(arabic_letters), dtype=torch.float32)
+
+    # Create a mapping of words to indices for one-hot encoding
+    word_to_idx = {word: idx for idx, word in enumerate(arabic_letters)}
+
+    for sentence in data:
+        encoded_sentence = torch.empty(0, len(arabic_letters), dtype=torch.float32)
+
+        for letter in sentence:
+            # Use one-hot encoding for each letter
+            if letter in word_to_idx:
+                idx = word_to_idx[letter]
+                one_hot = torch.zeros(len(arabic_letters), dtype=torch.float32)
+                one_hot[idx] = 1
+                one_hot = one_hot.unsqueeze(0)
+            else:
+                # If the word is not in the vocabulary, fill with zeros
+                one_hot = torch.zeros(len(arabic_letters), dtype=torch.float32).unsqueeze(0)
+
+            encoded_sentence = torch.cat((encoded_sentence, one_hot), 0)
+
+        encoded_data = torch.cat((encoded_data, encoded_sentence.unsqueeze(0)), 0)
+
     encoding_labels = torch.tensor(labels, dtype=torch.long)
+
+    return encoded_data, encoding_labels
+    
+
+
+
+
     return encoded_data, encoding_labels
 
 class DataSet():
