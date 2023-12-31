@@ -431,7 +431,21 @@ def get_tf_idf_features(data, labels):
     
 
 
+def get_bow_features(data, labels, max_seq_length=400):
+    # Create a CountVectorizer
+    vectorizer = CountVectorizer(analyzer='char', vocabulary=arabic_letters)
 
+    # Fit and transform the data
+    encoded_data = vectorizer.transform(data)
+
+    # Convert to a PyTorch sparse tensor with the specified max_seq_length
+    encoded_data = torch.sparse.FloatTensor(
+        torch.tensor(encoded_data.nonzero()).t(),
+        torch.ones(encoded_data.nnz),
+        (len(data), max_seq_length, len(arabic_letters))
+    )
+
+    encoding_labels = torch.tensor(labels, dtype=torch.long)
 
     return encoded_data, encoding_labels
 
