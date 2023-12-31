@@ -270,23 +270,23 @@ def get_data(path):
     write_to_file_string("test","data.txt",text)
     # text=split_text(text)
     text=text.split('.')
-    data=[]
-    labels=[]
-    for t in text:
-        d=""
-        l=[]
-        if len(t)>300:
-            continue
-        else:
-            d,l=get_data_labels(t)
-            if(len(d)==0): continue
-            if(len(d)<max_len):
-                while(len(d)<max_len):
-                    d+=" "
-                    l.append(14)
-                data.append(d)
-                labels.append(l)
-                continue
+    # data=[]
+    # labels=[]
+    # for t in text:
+    #     d=""
+    #     l=[]
+    #     if len(t)>300:
+    #         continue
+    #     else:
+    #         d,l=get_data_labels(t)
+    #         if(len(d)==0): continue
+    #         if(len(d)<max_len):
+    #             while(len(d)<max_len):
+    #                 d+=" "
+    #                 l.append(14)
+    #             data.append(d)
+    #             labels.append(l)
+    #             continue
             
     # write_to_file_second("test","data.txt",text)
     # # get max length of sentence in text 
@@ -304,38 +304,38 @@ def get_data(path):
     # Filter out empty strings or whitespace-only sentences
     # text = [s.strip() for s in sentences if s.strip()]
 
-    # data=[]
-    # labels=[]
-    # for t in text:
-    #     d=""
-    #     l=[]
-    #     d,l=get_data_labels(t)
-    #     if(len(d)==0): continue
-    #     if(len(d)<max_len):
-    #         while(len(d)<max_len):
-    #              d+=" "
-    #              l.append(14)
-    #         data.append(d)
-    #         labels.append(l)
-    #         continue
-    #     if(len(d)>max_len):
-    #         data.append(d[:max_len])
-    #         labels.append(l[:max_len])
-    #         supdata=d[max_len:]
-    #         suplabels=l[max_len:]
-    #         while(len(supdata)>max_len):
-    #             data.append(supdata[:max_len])
-    #             labels.append(suplabels[:max_len])
-    #             supdata=supdata[max_len:]
-    #             suplabels=suplabels[max_len:]
-    #         if(len(supdata)<max_len):
-    #             while(len(supdata)<max_len):
-    #                 supdata+=" "
-    #                 suplabels.append(14)
-    #             data.append(supdata)
-    #             labels.append(suplabels)
-    #     # data.append(d)
-    #     # labels.append(l)
+    data=[]
+    labels=[]
+    for t in text:
+        d=""
+        l=[]
+        d,l=get_data_labels(t)
+        if(len(d)==0): continue
+        if(len(d)<max_len):
+            while(len(d)<max_len):
+                 d+=" "
+                 l.append(14)
+            data.append(d)
+            labels.append(l)
+            continue
+        if(len(d)>max_len):
+            data.append(d[:max_len])
+            labels.append(l[:max_len])
+            supdata=d[max_len:]
+            suplabels=l[max_len:]
+            while(len(supdata)>max_len):
+                data.append(supdata[:max_len])
+                labels.append(suplabels[:max_len])
+                supdata=supdata[max_len:]
+                suplabels=suplabels[max_len:]
+            if(len(supdata)<max_len):
+                while(len(supdata)<max_len):
+                    supdata+=" "
+                    suplabels.append(14)
+                data.append(supdata)
+                labels.append(suplabels)
+        data.append(d)
+        labels.append(l)
     
     # for d in data:
     #     write_to_file_string("test","data.txt",d)
