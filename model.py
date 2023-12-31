@@ -23,7 +23,7 @@ class LSTM(nn.Module):
         self.fc = nn.Linear(hidden_dim * 2, num_classes)  # Output layer for 0 to 16 integers
 
     def forward(self, input_sequence: torch.Tensor):
-        output, _ = self.lstm(input_sequence)  
+        output, _ = self.lstm(input_sequence) 
         output = self.fc(output)
         return output
     
@@ -37,26 +37,24 @@ class GRU(nn.Module):
         output, _ = self.gru(input_sequence)  
         output = self.fc(output)
         return output
-
+device = torch.device("cpu" if torch.cuda.is_available() else "cpu")
 def train(train_dl, model):
     # define the optimization
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.01)
+    model.to(device)
     # enumerate epochs
-    for epoch in range(100):
+    for epoch in range(1):
         for i, (inputs, targets) in enumerate(train_dl):
             # convert the input and target to tensor
             # clear the gradients
             optimizer.zero_grad()
             # compute the model output
-            yhat = model(inputs)
+            yhat = model(inputs.to(device))
             yhat = yhat.view(-1, yhat.size(2))  # Reshape model output to [batch_size * sequence_length, num_classes]
             targets = targets.view(-1)  # Reshape targets to [batch_size * sequence_length]
-            # print(yhat.shape)
-            # print(targets.shape)
-
             # calculate loss
-            loss = criterion(yhat, targets)
+            loss = criterion(yhat, targets.to(device))
             loss.backward()
             # update model weights
             optimizer.step()
@@ -87,9 +85,10 @@ def calculate_DER(actual_labels, predicted_labels):
 
 def evaluate_model(test_dl, model):
     predictions, actuals = [], []
+    space=torch.tensor([15]).to(device)
+    model.to(device)
     for i, (inputs, targets) in enumerate(test_dl):
-        # evaluate the model on the test set
-        yhat = model(inputs)
+        yhat = model(inputs.to(device))
         yhat = yhat.detach().cpu().numpy()
         # reshape the outputs to [batch_size * sequence_length, num_classes]
         yhat = yhat.reshape(-1, yhat.shape[-1])

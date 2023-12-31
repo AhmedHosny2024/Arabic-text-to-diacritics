@@ -60,7 +60,9 @@ classes = {
     'ٌّ': 12,
     'ٍّ': 13,
     "":14,
+    " ":15
 }
+
 
 inverted_classes = {v: k for k, v in classes.items()}
 
@@ -159,7 +161,7 @@ ARAB_CHARS = "ىعظحرسيشضق ثلصطكآماإهزءأفؤغجئدةخو�
 # [".", "،", ":", "؛", "-", "؟"]
 VALID_ARABIC = HARAQAT + list(ARAB_CHARS) + ['.']
 
-
+device = torch.device("cpu" if torch.cuda.is_available() else "cpu")
 import re
 
 _whitespace_re = re.compile(r"\s+")
@@ -172,7 +174,8 @@ def remove_spaces(text):
 def preprocessing(text):
     text = filter(lambda char: char in VALID_ARABIC, text)
     text = remove_spaces(''.join(list(text)))
-    return text.strip()
+    text=text.strip()
+    return text
 
 
 def get_data_labels(text):
@@ -181,10 +184,16 @@ def get_data_labels(text):
     for i in range(len(text)):
         if(text[i] in arabic_letters):
             data+=text[i]
-            if(i+1<len(text) and text[i+1] in dicritics):
-                if(i+2<len(text) and classes[text[i+1]]==4 and text[i+2] in dicritics):
-                    labels.append(classes[text[i+1]+text[i+2]])
-                    i+=2
+            if(text[i]==" "):
+                labels.append(15)
+            elif(i+1<len(text) and text[i+1] in dicritics):
+                if(i+2<len(text) and text[i+2] in dicritics and (text[i+1]==4 or text[i+2]==4)):
+                    if(text[i+1]==4 ):
+                        labels.append(classes[text[i+1]+text[i+2]])
+                        i+=2
+                    else:
+                        labels.append(classes[text[i+2]+text[i+1]])
+                        i+=2
                 else:
                     labels.append(classes[text[i+1]])
                     i+=1
@@ -207,12 +216,12 @@ def encoding(text):
     idx=arabic_letters.index(text)
     encode=np.zeros(len(arabic_letters))
     encode[idx]=1
-    return torch.tensor(encode,dtype=torch.float32)
+    return torch.tensor(encode,dtype=torch.float32).to(device)
 
 
 def get_dataloader(encoded_data, encoding_labels,batch_size=1):
     # Create TensorDataset
-    dataset = TensorDataset(encoded_data, encoding_labels)
+    dataset = TensorDataset(encoded_data.to(device), encoding_labels.to(device))
     # Create DataLoader
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     return dataloader
@@ -259,34 +268,57 @@ def get_validation():
     
     return dataloader
 
-def get_data(path):
+def get_test(path):
     text=read_text(path)
     text=preprocess(text)
-    size=int(0.02*len(text))
+    size=int(0.01*len(text))
     text=text[:size]
     print(len(text))
     text = preprocessing(text)
     text="".join(text)
-    write_to_file_string("test","data.txt",text)
+    text=text.split('.')
+    data=[]
+    labels=[]
+    for t in text:
+        t=t.strip()
+        d=""
+        l=[]
+        if len(t)>max_len:
+            continue
+        else:
+            d,l=get_data_labels(t)
+            if(len(d)==0): continue
+            elif(len(d)<max_len):
+                data.append(d)
+                labels.append(l)
+                continue
+            elif(len(d)>max_len):
+                data.append(d[:max_len])
+                labels.append(l[:max_len])
+                supdata=d[max_len:]
+                suplabels=l[max_len:]
+                while(len(supdata)>max_len):
+                    data.append(supdata[:max_len])
+                    labels.append(suplabels[:max_len])
+                    supdata=supdata[max_len:]
+                    suplabels=suplabels[max_len:]
+                if(len(supdata)<max_len):
+                    data.append(supdata)
+                    labels.append(suplabels)
+    return data,labels
+
+def get_data(path):
+    text=read_text(path)
+    text=preprocess(text)
+    size=int(0.01*len(text))
+    text=text[:size]
+    print(len(text))
+    text = preprocessing(text)
+    text="".join(text)
+    # write_to_file_string("test","data.txt",text)
     # text=split_text(text)
     text=text.split('.')
-    # data=[]
-    # labels=[]
-    # for t in text:
-    #     d=""
-    #     l=[]
-    #     if len(t)>300:
-    #         continue
-    #     else:
-    #         d,l=get_data_labels(t)
-    #         if(len(d)==0): continue
-    #         if(len(d)<max_len):
-    #             while(len(d)<max_len):
-    #                 d+=" "
-    #                 l.append(14)
-    #             data.append(d)
-    #             labels.append(l)
-    #             continue
+  
             
     # write_to_file_second("test","data.txt",text)
     # # get max length of sentence in text 
@@ -314,7 +346,7 @@ def get_data(path):
         if(len(d)<max_len):
             while(len(d)<max_len):
                  d+=" "
-                 l.append(14)
+                 l.append(15)
             data.append(d)
             labels.append(l)
             continue
@@ -331,7 +363,7 @@ def get_data(path):
             if(len(supdata)<max_len):
                 while(len(supdata)<max_len):
                     supdata+=" "
-                    suplabels.append(14)
+                    suplabels.append(15)
                 data.append(supdata)
                 labels.append(suplabels)
         # data.append(d)
@@ -342,15 +374,15 @@ def get_data(path):
     return data,labels
 
 def get_features(data,labels):
-    encoded_data = torch.empty(0, max_len, len(arabic_letters),dtype=torch.float32)
+    encoded_data = torch.empty(0, max_len, len(arabic_letters),dtype=torch.float32).to(device)
     for d in data:
-        enc = torch.empty(0, len(arabic_letters),dtype=torch.float32)
+        enc = torch.empty(0, len(arabic_letters),dtype=torch.float32).to(device)
         for letter in d:
-            x = encoding(letter).unsqueeze(0)
+            x = encoding(letter).unsqueeze(0).to(device)
             enc = torch.cat((enc, x), 0)
         encoded_data = torch.cat((encoded_data, enc.unsqueeze(0)), 0)
     # print(encoded_data.shape)
-    encoding_labels=torch.tensor(labels,dtype=torch.long)
+    encoding_labels=torch.tensor(labels,dtype=torch.long).to(device)
     # print(encoding_labels.shape)
     return encoded_data,encoding_labels
     
@@ -397,9 +429,12 @@ def get_tf_idf_features(data, labels):
 
 class DataSet():
 
-    def __init__(self,path,batch_size=1) :
+    def __init__(self,path,batch_size=1,test=False) :
         print("Loading data...")
-        data1,labels1=get_data(path)
+        if(test):
+            data1,labels1=get_test(path)
+        else:
+            data1,labels1=get_data(path)
         # now labels is list of list [[1,2,3,4,5,15,15,0],[1,2,3,4,5,15,15,0]]
         # data is list of string ['احمد','محمد']
         print("Extracting features...")
