@@ -18,8 +18,8 @@ def write_to_file_string(dirctory,file_path, text):
 class LSTM(nn.Module):
     def __init__(self, inp_vocab_size: int, hidden_dim: int = 256, seq_len: int = 600, num_classes: int = 16):
         super().__init__()
-        # self.lstm = nn.LSTM(inp_vocab_size, hidden_dim,num_layers=3, batch_first=True, bidirectional=True)
-        self.lstm = nn.LSTM(inp_vocab_size, hidden_dim, batch_first=True, bidirectional=True)
+        self.lstm = nn.LSTM(inp_vocab_size, hidden_dim,num_layers=3, batch_first=True, bidirectional=True)
+        # self.lstm = nn.LSTM(inp_vocab_size, hidden_dim, batch_first=True, bidirectional=True)
         self.fc = nn.Linear(hidden_dim * 2, num_classes)  # Output layer for 0 to 16 integers
 
     def forward(self, input_sequence: torch.Tensor):

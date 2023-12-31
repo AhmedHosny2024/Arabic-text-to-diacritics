@@ -202,12 +202,15 @@ def get_data_labels(text):
 #             onehot_encoded.append(encode)
 #     onehot_encoded=torch.tensor(onehot_encoded)
 #     return onehot_encoded 
+torch.cuda.is_available()
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu" if torch.cuda.is_available() else "cpu")
 
 def encoding(text):
     idx=arabic_letters.index(text)
     encode=np.zeros(len(arabic_letters))
     encode[idx]=1
-    return torch.tensor(encode,dtype=torch.float32)
+    return torch.tensor(encode,dtype=torch.float32).to(device)
 
 
 def get_dataloader(encoded_data, encoding_labels,batch_size=1):
@@ -259,15 +262,15 @@ def get_validation():
     
     return dataloader
 
+
 def get_data(path):
     text=read_text(path)
     text=preprocess(text)
-    size=int(0.02*len(text))
-    text=text[:size]
-    print(len(text))
+    # size=int(0.02*len(text))
+    # text=text[:size]
     text = preprocessing(text)
     text="".join(text)
-    write_to_file_string("test","data.txt",text)
+    # write_to_file_string("test","data.txt",text)
     # text=split_text(text)
     text=text.split('.')
     # data=[]
@@ -289,7 +292,7 @@ def get_data(path):
     #             continue
             
     # write_to_file_second("test","data.txt",text)
-    # # get max length of sentence in text 
+    # # get max length of sentence in text
     # maxdata=text.split('\n')
 
     # max_len=0
@@ -341,16 +344,17 @@ def get_data(path):
     #     write_to_file_string("test","data.txt",d)
     return data,labels
 
+
 def get_features(data,labels):
-    encoded_data = torch.empty(0, max_len, len(arabic_letters),dtype=torch.float32)
+    encoded_data = torch.empty(0, max_len, len(arabic_letters),dtype=torch.float32).to(device)
     for d in data:
-        enc = torch.empty(0, len(arabic_letters),dtype=torch.float32)
+        enc = torch.empty(0, len(arabic_letters),dtype=torch.float32).to(device)
         for letter in d:
-            x = encoding(letter).unsqueeze(0)
+            x = encoding(letter).unsqueeze(0).to(device)
             enc = torch.cat((enc, x), 0)
         encoded_data = torch.cat((encoded_data, enc.unsqueeze(0)), 0)
     # print(encoded_data.shape)
-    encoding_labels=torch.tensor(labels,dtype=torch.long)
+    encoding_labels=torch.tensor(labels,dtype=torch.long).to(device)
     # print(encoding_labels.shape)
     return encoded_data,encoding_labels
     
