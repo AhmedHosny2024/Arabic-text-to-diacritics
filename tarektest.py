@@ -14,6 +14,7 @@ model.load_state_dict(torch.load('LSTM98.pth'))
 
 
 
+
 Valdata=DataSet("Dataset/val.txt",batch_size=1)
 Validationdataloader=Valdata.getdata()
 acc = evaluate_model(Validationdataloader, model)

@@ -337,8 +337,8 @@ def get_data(path):
                     suplabels.append(14)
                 data.append(supdata)
                 labels.append(suplabels)
-        data.append(d)
-        labels.append(l)
+        # data.append(d)
+        # labels.append(l)
     
     # for d in data:
     #     write_to_file_string("test","data.txt",d)
