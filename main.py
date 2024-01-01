@@ -13,7 +13,7 @@ Validationdataloader = Valdata.getdata()
 test_data = DataSet("Dataset/val.txt", batch_size=1)
 test_dataloader = test_data.getdata()
 
-inp_vocab_size = 37
+inp_vocab_size = 300
 hidden_dim = 128
 seq_len = 400
 num_classes = 16

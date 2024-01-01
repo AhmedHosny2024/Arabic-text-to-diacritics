@@ -26,10 +26,10 @@ import os
 #     sentences = [sentence.text for sentence in doc.sentences]
     
 #     return sentences
-file_path = './SG_300_3_400/w2v_SG_300_3_400_10.model'
+# file_path = '../SG_300_3_400/w2v_SG_300_3_400_10.model'
 # word_embed_model = Word2Vec.load(file_path)
 
-max_len=200
+max_len=300
 
 with open('files/arabic_letters.pickle', 'rb') as file:
             ARABIC_LETTERS_LIST = pkl.load(file)
@@ -301,14 +301,14 @@ def get_test(path):
 def get_data(path):
     text=read_text(path)
     text=preprocess(text)
-    # size=int(0.01*len(text))
-    # text=text[:size]
-    # print(len(text))
+    size=int(0.02*len(text))
+    text=text[:size]
     text = preprocessing(text)
     text="".join(text)
     # write_to_file_string("test","data.txt",text)
     # text=split_text(text)
     text=text.split('.')
+    print(len(text))
   
             
     # write_to_file_second("test","data.txt",text)
@@ -461,6 +461,8 @@ class DataSet():
         # data is list of string ['احمد','محمد']
         print("Extracting features...")
         data,labels=get_features(data1,labels1)
+        # data,labels=get_word2vec_features(data1,labels1,word_embed_model)
+        print(data.shape)
         # now the data and labels are tensor
         # data is tensor of shape (number of sentences,max_len,37)
         # labels is tensor of shape (number of sentences,max_len)

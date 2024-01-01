@@ -38,7 +38,7 @@ class GRU(nn.Module):
         output = self.fc(output)
         return output
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu" if torch.cuda.is_available() else "cpu")
 def train(train_dl, model):
     # define the optimization
     criterion = nn.CrossEntropyLoss()
@@ -86,7 +86,6 @@ def calculate_DER(actual_labels, predicted_labels):
 
 def evaluate_model(test_dl, model):
     predictions, actuals = [], []
-    space=torch.tensor([15]).to(device)
     model.to(device)
     for i, (inputs, targets) in enumerate(test_dl):
         yhat = model(inputs.to(device))
