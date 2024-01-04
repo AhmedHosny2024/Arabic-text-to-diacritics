@@ -2,7 +2,7 @@ import pickle as pkl
 from torch.utils.data import TensorDataset, DataLoader
 import re
 import torch
-import numpy as np 
+import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 import scipy.sparse
 # from gensim.models import KeyedVectors
@@ -21,21 +21,23 @@ import os
 # def split_arabic_sentences_with_stanfordnlp(corpus_text):
 #     # Process the text
 #     doc = nlp(corpus_text)
-    
+
 #     # Extract sentences from the doc
 #     sentences = [sentence.text for sentence in doc.sentences]
-    
+
 #     return sentences
 # file_path = '../SG_300_3_400/w2v_SG_300_3_400_10.model'
 # word_embed_model = Word2Vec.load(file_path)
 
 max_len=300
 
-with open('files/arabic_letters.pickle', 'rb') as file:
+with open('/content/drive/MyDrive/NLP project/arabic_letters.pickle', 'rb') as file:
             ARABIC_LETTERS_LIST = pkl.load(file)
-with open('files/diacritics.pickle', 'rb') as file:
+with open('/content/drive/MyDrive/NLP project/diacritics.pickle', 'rb') as file:
             DIACRITICS_LIST = pkl.load(file)
-  
+with open('/content/drive/MyDrive/NLP project/diacritic2id.pickle', 'rb') as file:
+            DIACRITICS_LIST2ID = pkl.load(file)
+
 arabic_letters=[]
 for letter in ARABIC_LETTERS_LIST:
     arabic_letters.append(letter[0])
@@ -45,25 +47,9 @@ arabic_letters.append(" ")
 dicritics=[]
 for letter in DIACRITICS_LIST:
     dicritics.append(letter[0])
+classes={k:i for i,k in enumerate(DIACRITICS_LIST2ID)}
+classes[" "]=15
 
-classes = {
-    'َ': 0,
-    'ُ': 1,
-    'ِ': 2,
-    'ْ': 3,
-    'ّ': 4,
-    'ً': 5,
-    'ٌ': 6,
-    'ٍ': 7,
-    'َّ': 8,
-    'ُّ': 9,
-    'ِّ': 10,
-    'ًّ': 11,
-    'ٌّ': 12,
-    'ٍّ': 13,
-    "":14,
-    " ":15
-}
 
 
 inverted_classes = {v: k for k, v in classes.items()}
@@ -72,7 +58,7 @@ inverted_classes = {v: k for k, v in classes.items()}
 def read_text(file_path):
     with open(file_path, "r", encoding="utf-8") as file:
         return file.read()
-    
+
 def write_to_file_second(dirctory,file_path, text):
     if not os.path.exists(dirctory):
         os.makedirs(dirctory)
@@ -103,12 +89,12 @@ def write_to_file_string(dirctory,file_path, text):
         file.write('\n')
         file.write('\n')
 #####################################################
-   
+
 def preprocess(text):
-        # Remove URLs 
+        # Remove URLs
         text = re.sub(r"http[s|S]\S+", "", text,flags=re.MULTILINE)
         text = re.sub(r"www\S+", "", text,flags=re.MULTILINE)
-        # Remove English letters 
+        # Remove English letters
         text = re.sub(r"[A-Za-z]+", "", text,flags=re.MULTILINE)
         # Remove Kashida Arabic character
         text = re.sub(r"\u0640", "", text,flags=re.MULTILINE)
@@ -130,7 +116,7 @@ def preprocess(text):
 # text=preprocess(text)
 # print(len(text))
 # # delete except arabic letters and dicritics and punctuation
-# # remove multiple spaces 
+# # remove multiple spaces
 
 # write_to_file_string("test","data.txt",text)
 
@@ -158,12 +144,9 @@ def split_text(text):
     return data
 
 
-HARAQAT = ["ْ", "ّ", "ٌ", "ٍ", "ِ", "ً", "َ", "ُ"]
-ARAB_CHARS = "ىعظحرسيشضق ثلصطكآماإهزءأفؤغجئدةخوبذتن"
 # [".", "،", ":", "؛", "-", "؟"]
-VALID_ARABIC = HARAQAT + list(ARAB_CHARS) + ['.']
+VALID_ARABIC = dicritics + arabic_letters + ['.']
 
-device = torch.device("cpu" if torch.cuda.is_available() else "cpu")
 import re
 
 _whitespace_re = re.compile(r"\s+")
@@ -180,6 +163,7 @@ def preprocessing(text):
     return text
 
 
+
 def get_data_labels(text):
     data=""
     labels=[]
@@ -189,12 +173,12 @@ def get_data_labels(text):
             if(text[i]==" "):
                 labels.append(15)
             elif(i+1<len(text) and text[i+1] in dicritics):
-                if(i+2<len(text) and text[i+2] in dicritics and (text[i+1]==4 or text[i+2]==4)):
-                    if(text[i+1]==4 ):
-                        labels.append(classes[text[i+1]+text[i+2]])
+                if(i+2<len(text) and text[i+2] in dicritics and (classes.get(text[i+1])==7 or classes.get(text[i+2])==7)):
+                    if(text[i+1]==7 ):
+                        labels.append(classes[text[i+2]+text[i+1]])
                         i+=2
                     else:
-                        labels.append(classes[text[i+2]+text[i+1]])
+                        labels.append(classes[text[i+1]+text[i+2]])
                         i+=2
                 else:
                     labels.append(classes[text[i+1]])
@@ -214,7 +198,7 @@ def get_dataloader(encoded_data, encoding_labels,batch_size=1):
     # Create TensorDataset
     dataset = TensorDataset(encoded_data.to(device), encoding_labels.to(device))
     # Create DataLoader
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
     return dataloader
 
 
@@ -244,7 +228,7 @@ def get_validation():
         #     data.append(text[i])
         #     labels.append(15)
     encoded_data = torch.empty(0, len(arabic_letters),dtype=torch.float32)
-    
+
     for letter in data:
         if letter in arabic_letters:
             x = encoding(letter).unsqueeze(0)
@@ -256,7 +240,7 @@ def get_validation():
     # print(encoded_data.shape)
     # print(labels.shape)
     dataloader=get_dataloader(encoded_data,labels)
-    
+
     return dataloader
 
 def get_test(path):
@@ -301,18 +285,18 @@ def get_test(path):
 def get_data(path):
     text=read_text(path)
     text=preprocess(text)
-    size=int(0.02*len(text))
-    text=text[:size]
+    # size=int(len(text))
+    # text=text[:size]
     text = preprocessing(text)
     text="".join(text)
     # write_to_file_string("test","data.txt",text)
     # text=split_text(text)
     text=text.split('.')
     print(len(text))
-  
-            
+    # print(text[:10])
+
     # write_to_file_second("test","data.txt",text)
-    # # get max length of sentence in text 
+    # # get max length of sentence in text
     # maxdata=text.split('\n')
 
     # max_len=0
@@ -359,7 +343,7 @@ def get_data(path):
                 labels.append(suplabels)
         # data.append(d)
         # labels.append(l)
-    
+    print("first sententence :" , data[0])
     # for d in data:
     #     write_to_file_string("test","data.txt",d)
     return data,labels
@@ -376,7 +360,7 @@ def get_features(data,labels):
     encoding_labels=torch.tensor(labels,dtype=torch.long).to(device)
     # print(encoding_labels.shape)
     return encoded_data,encoding_labels
-    
+
 def get_word2vec_features(data, labels, model):
     max_seq_length = 300
     encoded_data = torch.empty(0, max_len, max_seq_length, dtype=torch.float32)
@@ -399,7 +383,7 @@ def get_word2vec_features(data, labels, model):
 
     return encoded_data, encoding_labels
 
-    
+
 def get_tf_idf_features(data, labels):
     # Create a one-hot encoding tensor with the same dimensions as Word2Vec
     encoded_data = torch.empty(0, max_len, len(arabic_letters), dtype=torch.float32)
@@ -428,7 +412,7 @@ def get_tf_idf_features(data, labels):
     encoding_labels = torch.tensor(labels, dtype=torch.long)
 
     return encoded_data, encoding_labels
-    
+
 
 
 def get_bow_features(data, labels, max_seq_length=400):
@@ -482,8 +466,7 @@ class DataSet():
         return self.dataloader
     def getx(self):
         return self.x
-    
 
 
 
-        
+

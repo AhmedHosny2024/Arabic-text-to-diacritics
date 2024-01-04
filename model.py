@@ -23,10 +23,10 @@ class LSTM(nn.Module):
         self.fc = nn.Linear(hidden_dim * 2, num_classes)  # Output layer for 0 to 16 integers
 
     def forward(self, input_sequence: torch.Tensor):
-        output, _ = self.lstm(input_sequence) 
+        output, _ = self.lstm(input_sequence)
         output = self.fc(output)
         return output
-    
+
 class GRU(nn.Module):
     def __init__(self, inp_vocab_size: int, hidden_dim: int = 256, seq_len: int = 600, num_classes: int = 16):
         super().__init__()
@@ -34,18 +34,18 @@ class GRU(nn.Module):
         self.fc = nn.Linear(hidden_dim * 2, num_classes)  # Output layer for 0 to 16 integers
 
     def forward(self, input_sequence: torch.Tensor):
-        output, _ = self.gru(input_sequence)  
+        output, _ = self.gru(input_sequence)
         output = self.fc(output)
         return output
 
-device = torch.device("cpu" if torch.cuda.is_available() else "cpu")
+
 def train(train_dl, model):
     # define the optimization
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.01)
     model.to(device)
     # enumerate epochs
-    for epoch in range(1):
+    for epoch in range(20):
         for i, (inputs, targets) in enumerate(train_dl):
             # convert the input and target to tensor
             # clear the gradients
@@ -55,6 +55,9 @@ def train(train_dl, model):
             yhat = yhat.view(-1, yhat.size(2))  # Reshape model output to [batch_size * sequence_length, num_classes]
             targets = targets.view(-1)  # Reshape targets to [batch_size * sequence_length]
             # calculate loss
+            while len(targets)>0 and targets[-1]==15:
+              targets=targets[:-1]
+              yhat=yhat[:-1]
             loss = criterion(yhat, targets.to(device))
             loss.backward()
             # update model weights
@@ -71,14 +74,14 @@ def calculate_DER(actual_labels, predicted_labels):
         actual_labels = torch.tensor(actual_labels)
     if not isinstance(predicted_labels, torch.Tensor):
         predicted_labels = torch.tensor(predicted_labels)
-    
+
     # Check if the lengths of both label sequences match
     if len(actual_labels) != len(predicted_labels):
         raise ValueError("Lengths of actual and predicted labels should match.")
-    
+
     total_errors = torch.sum(actual_labels != predicted_labels)
     total_frames = len(actual_labels)
-    
+
     # DER calculation
     DER = (1-(total_errors / total_frames)) * 100.0
     return DER.item()  # Convert PyTorch scalar to Python float

@@ -4,30 +4,7 @@ from data import *
 from model import *
 
 
-classes = {
-    'َ': 0,
-    'ُ': 1,
-    'ِ': 2,
-    'ْ': 3,
-    'ّ': 4,
-    'ً': 5,
-    'ٌ': 6,
-    'ٍ': 7,
-    'َّ': 8,
-    'ُّ': 9,
-    'ِّ': 10,
-    'ًّ': 11,
-    'ٌّ': 12,
-    'ٍّ': 13,
-    "":14,
-    " ":15
-}
-
-
-inverted_classes = {v: k for k, v in classes.items()}
-
-
-inp_vocab_size = 37
+inp_vocab_size = 300
 hidden_dim = 128
 seq_len = 400
 num_classes = 16
@@ -107,7 +84,7 @@ def evaluate_model(test_dl, model):
         predicted_classes = np.argmax(yhat, axis=1)
         # convert targets to numpy array and reshape
         targets = targets.cpu().numpy().reshape(-1)
-        while targets[-1]==15:
+        while len(targets)>0 and targets[-1]==15:
             targets=targets[:-1]
             predicted_classes=predicted_classes[:-1]
         # store predictions and actuals
@@ -162,3 +139,32 @@ def calculate_DER(actual_labels, predicted_labels):
 
 acc = calculate_DER(np.array(actuals), np.array(predictions))
 print("Accuracy: ", acc)
+
+
+# test one sentence
+
+# data="ذهب علي الي الشاطئ"
+# enc = torch.empty(0, len(arabic_letters),dtype=torch.float32).to(device)
+# for letter in data:
+#     x = encoding(letter).unsqueeze(0).to(device)
+#     enc = torch.cat((enc, x), 0)
+# # print(encoded_data.shape)
+# encoding_labels=torch.tensor([],dtype=torch.long).to(device)
+# predictions=[]
+# # for i in range(len(enc)):
+# yhat = model(enc.to(device))
+# yhat = yhat.detach().cpu().numpy()
+# # reshape the outputs to [batch_size * sequence_length, num_classes]
+# yhat = yhat.reshape(-1, yhat.shape[-1])
+# # get predicted classes
+# predicted_classes = np.argmax(yhat, axis=1)
+# # store predictions and actuals
+# predictions.extend(predicted_classes.tolist())
+# res=""
+# inverted_classes = {v: k for k, v in classes.items()}
+
+# for i in range(len(data)):
+#   res+=data[i]
+#   res+=inverted_classes[predictions[i]]
+# print(res)
+
