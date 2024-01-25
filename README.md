@@ -18,17 +18,14 @@ can have different meanings and different pronunciations based on how it is diac
  - also we try many features like using pre-trained word embedding, tf-idf, and char embedding but we found that the best one is using one hot encoding for each char.
  - it is a classification problem on char-level with 14 classes (no diacritics, fath, damm, ...).
 
-<br>
-<br>
-
-
 ## Preprocessing <a name = "preprocessing"></a>
-  - first we remove numbers, english letters, Html tags using, urls using regex.
+  - first we remove numbers, english letters, HTML tags, urls using regex.
   - then we remove any char except Arabic letters, diacritics, spaces and (.) .
   - remove extra spaces.
-  - split text on spaces.
-  - take each sentence and remove dicretics from it make it the label. 
+  - split text on (.) .
+  - for each char in eaxh sentence remove dicretics from it and make the dicretics is the label. 
   - make each sentence a list of 200 chars and make it the input, if the sentence samller than 200 chars we add padding to it (spaces), if it bigger split it to multiple sentences.
+  - create dataloader
 ## Feature extraction <a name = "features-extraction"></a>
   - we use one hot encoding for each char.
 
